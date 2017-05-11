@@ -8,7 +8,7 @@ As of today the code to install the package in R below is working.
 Install the package in R:
 ```R
 # installation (required only once)
-install.packages("cmgo", repos="http://code.backtosquareone.de", type="source")
+install.packages("cmgo", repos="http://code.backtosquareone.de", type="source", dependencies=TRUE)
 
 # include the package (required for every start of an R session)
 library(cmgo)
