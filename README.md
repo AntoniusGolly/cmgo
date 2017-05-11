@@ -7,8 +7,11 @@ As of today the code to install the package in R below is working.
 
 Install the package in R:
 ```R
+# installation of dependencies (required only once)
+install.packages(c("spatstat", "zoo", "sp", "stringr"))
+
 # installation (required only once)
-install.packages("cmgo", repos="http://code.backtosquareone.de", type="source", dependencies=TRUE)
+install.packages("cmgo", repos="http://code.backtosquareone.de", type="source")
 
 # include the package (required for every start of an R session)
 library(cmgo)
