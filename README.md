@@ -42,7 +42,7 @@ library(cmgo)
 ?cmgo
 ```
 
-### 2. Source the R sciprts manually
+### 2. Source the R scripts manually
 Alternatively, you can source the scipts manually. This has the benefit, that you can directly modify the scripts. To do this, download the directories **./R** and **./data** from this repository and copy it to a location on your disc (e.g. "C:/cmgo"). Then run the following code:
 
 ```R
