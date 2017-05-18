@@ -2,11 +2,11 @@
 Deriving principle **c**hannel **m**etrics from bank and long-profile geometry with the R-package cmgo.
 
 ![Workflow](https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/01_processing.png)
-<sup>Figure 1: visualization of the work flow of the package, a) the channel bank points represent the data input, b) a polygon is generated where bank points are linearly interpolated, c-e) the centerline is calculated via Voronoi polygons, f) transects are calculated, g) the channel width is derived from the transects.</sup>
+<sup>Figure 1: visualization of the work flow of the package, a) the channel bank points that represent the data input, b) a polygon is generated where bank points are linearly interpolated, c-e) the centerline is calculated via Voronoi polygons, f) transects are calculated, g) the channel width is derived from the transects.</sup>
 
 ## What is cmgo?
 
-With this R package you perform geometrical calculations on your channel bank points, which represent your basic input. Based on these points, **cmgo** derives a centerline of one or multiple given channel shapes and calculates channel length, local and average channel width, local and average slope, local and average bank retreat, or the distances from the centerline respectively, as well as allows to project additional spatial metrics to the centerline.
+**cmgo** performs geometrical calculations on your channel bank points, which represent your basic input. The calculated geometry includes the centerline of one or multiple given channel shapes, channel length, local and average channel width, local and average slope, local and average bank retreat, or the distances from the centerline to the banks respectively, as well as allows to project additional spatial metrics to the centerline.
 
 ## Motivation
 
@@ -21,7 +21,7 @@ The program is free to use, modify and redistribute under the terms of the GNU G
 ## Installation
 
 There are two ways to use cmgo:
-1. Install library in R (for user with minor R experience, for users who do not intend to extend/modify the code)
+1. Include the cmgo package in R (for user with minor R experience, for users who do not intend to extend/modify the code)
 2. Source the R scripts manually (for users with major R experience, for users who intend to extend/modify the code)
 
 ### 1. Include the cmgo package
