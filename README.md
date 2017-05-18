@@ -33,7 +33,7 @@ There are two ways to use cmgo:
 install.packages(c("spatstat", "zoo", "sp", "stringr"))
 
 # installation (required only once)
-install.packages("cmgo", repos="http://code.backtosquareone.de", type="source")
+install.packages("cmgo", repos="https://raw.githubusercontent.com/AntoniusGolly/cmgo/master", type="source")
 
 # include the package (required for every start of an R session)
 library(cmgo)
