@@ -1,28 +1,46 @@
 #' Plot changes of the banks (erosion and aggradation)
 #'
-#' If more than one data set is defined in the global data object, of
+#' If multiple channel surveys are present (time series analyses) and the reference centerline mode is
+#' used, this function allows to plot the shift of the banks (bank erosion and aggradation) along the channel.
 #'
-#' Details
+#' \code{CM.plotBankShift()} allows to plot the position of banks with regard to the centerline in downstream
+#' direction. If only one survey is present, the plot will only show the distance of the right and left bank
+#' to the centerline over the centerline distance (downstream length of the channel). If multiple surveys of a
+#' channel exists (time series analyses) the differences of the channel banks can be calculated if a reference
+#' centerline is used (reference centerline mode). The differences (bank ersosion and aggradation) are plotted
+#' with this function. 
+#' 
+#' Without passing something to the function, the banks of the whole channel are plotted. To specify a region 
+#' use the \code{cl} and \code{d} parameters. See the parameter definition and the example section for details. 
 #'
 #' @template param_global_data_object
 #' @param set the reference data set
-#' @param cl The range of centerline points to be plotted, e.g. cl=c("120:130"). If NULL the full range will be plotted.
+#' @param cl the range of centerline points to be plotted, if NULL (default) the full channel length will be plotted, if
+#' a vector of two elements is provided (e.g. c(200, 500)) this cl range is plotted, if a string is provided (e.g. "cl1"),
+#' the range defined in \code{par$plot.cl.ranges$cl1} will be plotted
+#' @param d the distance range of the centerline downstream to be plotted, NULL (default) cl defintions are taken, if a
+#' single value (e.g. d=500) is given 50 m around this distance is plotted, if a vector with two elements is given (e.g.
+#' c(280, 620)) this distance range will be plotted
 #' @return desc
 #' @author Antonius Golly
 #' @examples
 #'
 #' # open demo
-#' cmgo.obj = CM.ini("demo2")
+#' cmgo.obj = CM.ini("demo3")
 #'
-#' # example 1: plot the change of the channel banks (aggradation/erosion)
-#' CM.plotBankRetreat(cmgo.obj)
+#' # example 1: plot the distance of channel banks to centerline
+#' CM.plotBankShift(cmgo.obj)
 #'
-#' # example 2: plot
-#' CM.plotBankRetreat(cmgo.obj, set="set2")
+#' # example 2: plot the change of the channel banks (aggradation/erosion)
+#' CM.plotBankShift(cmgo.obj, set="set2")
+#' 
+#' # example 3: plot only a range
+#' CM.plotBankShift(cmgo.obj, set="set2", cl=c(800, 850))
+#' CM.plotPlanView(cmgo.obj,  set="set2", cl=c(800, 850)) # compare with plan view map
 #'
-#' @export CM.plotBankRetreat
+#' @export CM.plotBankShift
 
-CM.plotBankRetreat <- function(object, set="set1", cl=NULL){
+CM.plotBankShift <- function(object, set="set1", cl=NULL, d=NULL){
 
   par  = object$par
   data = object$data
@@ -77,7 +95,7 @@ CM.plotBankRetreat <- function(object, set="set1", cl=NULL){
   }
 
   #dev.new(width=12, height=10)
-  notice("create bank retreat plot...")
+  notice("create bank retreat plot...", TRUE)
 
   plots = c(1)
   par(mfcol=c(1,length(plots)))
@@ -89,22 +107,35 @@ CM.plotBankRetreat <- function(object, set="set1", cl=NULL){
     #set.secondary = if(is.null(set.compare)) set.ref else set.compare
 
     ### define cl range
-    if(is.null(cl)) cl = par$plot.cl.range
+    if(is.null(cl)) cl = seq(along=data[[set.ref]]$cl$smoothed$x)
     if(typeof(cl) == "character"){ if(cl %in% names(par$plot.cl.ranges)) cl = par$plot.cl.ranges[[cl]] else stop(paste("given cl range", cl, "unknown!"))}
     if(length(cl) == 1) cl = c(cl, cl+1)
     if(length(cl) == 2) cl = seq(from = cl[1], to = cl[2]);
 
-    notice(paste("cl range set from", cl[1], "to", cl[length(cl)]))
+    if(!is.null(d)){
+      if(length(d) == 1) d = c(d-25, d+25)
+      if(d[1] < 0 ) d[1] = 0; if(d[2] >  tail(data[[set.ref]]$cl$smoothed$length, n=1)) d[2] = tail(data[[set.ref]]$cl$smoothed$length, n=1)
+      if(length(d) == 2) d = seq(from = d[1], to = d[2])
+      cl = seq(
+        from = which.min(abs(data[[set.ref]]$cl$smoothed$length - d[1])),
+        to   = which.min(abs(data[[set.ref]]$cl$smoothed$length - d[length(d)]))
+      )
+      notice(paste("d range: distance", d[1], "to", d[length(d)]))
+    }
 
-    y.lim         = max(data[[set]]$metrics$d.r[cl],data[[set]]$metrics$d.l[cl] )
+    notice(paste("cl range: index", cl[1], "to", cl[length(cl)]))
+
     leg = list()
+
+    y.lim = max(data[[set.ref]]$metrics$d.r[cl],data[[set.ref]]$metrics$d.l[cl], data[[set]]$metrics$d.r[cl], data[[set]]$metrics$d.l[cl], na.rm=TRUE)
+    if(set != set.ref) y.lim = max(y.lim , data[[set]]$metrics$diff.r[cl], data[[set]]$metrics$diff.l[cl], na.rm=TRUE)
 
     plot(
       0,
-      main = paste("Bank retreat of", set, "(solid) and", set.ref, "reference (dashed)"),
+      main = if(set == set.ref) paste("Bank position of", set) else paste("Bank shift of", set, "(solid) over", set.ref, "(dashed)"),
       ylim = c(-y.lim, y.lim),
-      xlim = c(cl[1],cl[1]+length(cl)),
-      xlab = "Index",
+      xlim = c(data[[set.ref]]$cl$smoothed$length[cl[1]],data[[set.ref]]$cl$smoothed$length[cl[length(cl)]]),
+      xlab = paste("Distance downstream [", par$input.unit, "]", sep=""),
       ylab = "Distance [m]",
       type = "n"
     )
@@ -112,36 +143,43 @@ CM.plotBankRetreat <- function(object, set="set1", cl=NULL){
 
     ############ right bank #############
 
+    length     = data[[set.ref]]$cl$smoothed$length
+
     ## bank distance of set
-    lines(data[[set]]$metrics$d.r     * data[[set]]$metrics$r.r,                     col = "green", lty=1)
-    leg = leg.add(leg, paste("right bank of", set, "to", set.ref, "(reference)"),   col = "green", lty=1, lwd=1)
+    lines(data[[set]]$metrics$d.r * data[[set]]$metrics$r.r ~ length,                    col = "green", lty=1)
+    leg = leg.add(leg, paste("right bank of", set, "(reference cl:", set.ref, ")"),      col = "green", lty=1, lwd=1)
 
     ## bank distance of set.ref
-    lines(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r,                 col = "green", lty=2)
-    leg = leg.add(leg, paste("right bank of", set.ref, "to", set.ref,"(reference)"),col = "green", lty=2, lwd=1)
+    if(set != set.ref){
+      lines(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r ~ length,          col = "green", lty=2)
+      leg = leg.add(leg, paste("right bank of", set.ref, "(reference cl:", set.ref,")"), col = "green", lty=2, lwd=1)
+    }
 
     ## bank retreat
-    lines(data[[set]]$metrics$diff.r,                                               col = colors()[240], lty=1, lwd=8)
-    lines(data[[set]]$metrics$diff.r,                                               col = "green", lty=6, lwd=2)
+    if(set != set.ref){
+      lines(data[[set]]$metrics$diff.r ~ length,                                         col = colors()[240], lty=1, lwd=8)
+      lines(data[[set]]$metrics$diff.r ~ length,                                         col = "green", lty=6, lwd=2)
+      leg = leg.add(leg, paste("right bank shift", set, "over", set.ref),                col = "green", lty=6, lwd=2)
+    }
 
-    leg = leg.add(leg, paste("right bank retreat", set, "over", set.ref),           col = "green", lty=6, lwd=2)
-    # 0 # lines(data[[set.ref]]$metrics$diff.r,                                     col = "green", lty=6, lwd=2)
 
     ##### left bank #####################
     ## bank distance of set
-    lines(data[[set]]$metrics$d.l     * data[[set]]$metrics$r.l,                    col = "red",   lty=1)
-    leg = leg.add(leg, paste("left bank of", set, "to", set.ref, "(reference)"),    col = "red",   lty=1, lwd=1)
+    lines(data[[set]]$metrics$d.l     * data[[set]]$metrics$r.l ~ length,                col = "red",   lty=1)
+    leg = leg.add(leg, paste("left bank of", set, "(reference cl:", set.ref, ")"),       col = "red",   lty=1, lwd=1)
 
     ## bank distance of set.ref
-    lines(data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l,                col = "red",   lty=2)
-    leg = leg.add(leg, paste("left bank of", set.ref, "to", set.ref,"(reference)"), col = "red",   lty=2, lwd=1)
+    if(set != set.ref){
+      lines(data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l ~ length    ,      col = "red",   lty=2)
+      leg = leg.add(leg, paste("left bank of", set.ref, "(reference cl:", set.ref,")"),  col = "red",   lty=2, lwd=1)
+    }
 
     ## bank retreat
-    lines(data[[set]]$metrics$diff.l,                                               col = colors()[240], lty=1, lwd=8)
-    lines(data[[set]]$metrics$diff.l,                                               col = "red",   lty=6, lwd=2)
-    leg = leg.add(leg, paste("left bank retreat", set, "over", set.ref),            col = "red",   lty=6, lwd=2)
-
-    # 0 # lines(data[[set.ref]]$metrics$diff.l, col="red", lty=2, lwd=2)
+    if(set != set.ref){
+      lines(data[[set]]$metrics$diff.l ~ length,                                         col = colors()[240], lty=1, lwd=8)
+      lines(data[[set]]$metrics$diff.l ~ length,                                         col = "red",   lty=6, lwd=2)
+      leg = leg.add(leg, paste("left bank shift", set, "over", set.ref),                 col = "red",   lty=6, lwd=2)
+    }
 
     # legend and scale bar ####################################################
     if(par$plot.planview.legend) leg.make(leg)
@@ -153,4 +191,3 @@ CM.plotBankRetreat <- function(object, set="set1", cl=NULL){
   notice("plotting done!")
 
 }
-
