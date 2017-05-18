@@ -18,6 +18,8 @@ The program is free to use, modify and redistribute under the terms of the GNU G
 
 >**Citation**: Golly, A. and Turowski, J. M.: Deriving principle channel metrics from bank and long-profile geometry with the R-package cmgo, Earth Surf. Dynam. Discuss., doi:10.5194/esurf-2017-32, in review, 2017.
 
+Find the [discussion paper at ESURF](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/).
+
 ## Installation
 
 There are two ways to use cmgo:
@@ -43,7 +45,7 @@ library(cmgo)
 ```
 
 ### 2. Source the R scripts manually
-Alternatively, you can source the scipts manually. This has the benefit, that you can directly modify the scripts. To do this, download the directories **./R** and **./data** from this repository and copy it to a location on your disc (e.g. "C:/cmgo"). Then run the following code:
+Alternatively, you can source the scipts manually. This has the benefit, that you can directly modify the scripts (note: only for advanced users advised). To do this, download this repository and extract the folder **./R** and **./data** to a location on your disc (e.g. "C:/cmgo"). Then run the following code:
 
 ```R
 
