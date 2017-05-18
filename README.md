@@ -26,6 +26,8 @@ There are two ways to use cmgo:
 1. Include the cmgo package in R (for user with minor R experience, for users who do not intend to extend/modify the code)
 2. Source the R scripts manually (for users with major R experience, for users who intend to extend/modify the code)
 
+You'll able to see the R documentation of cmgo (type `?cmgo` in the R console) only if you choose option 1.!
+
 ### 1. Include the cmgo package
 
 [Get](https://cran.r-project.org/), install and open R (2 min.) and run the following code in the R console:
