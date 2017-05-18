@@ -384,7 +384,7 @@ CM.calculateCenterline <- function(object, set=NULL){
 
 
       ### project features onto centerline
-      if(typeof(cmgo.obj$data[[set]]$features) == "list"){
+      if(typeof(data[[set]]$features) == "list"){
 
         notice("feature list found: project features to centerline", TRUE)
         cl$smoothed$projections = list()
@@ -399,12 +399,12 @@ CM.calculateCenterline <- function(object, set=NULL){
           window=owin(range(cl$smoothed$x), range(cl$smoothed$y))
         )
 
-        for(feature in names(cmgo.obj$data[[set]]$features)){
+        for(feature in names(data[[set]]$features)){
 
-          if(!is.null(cmgo.obj$data[[set]]$features[[feature]]$x) && !is.null(cmgo.obj$data[[set]]$features[[feature]]$y)){
+          if(!is.null(data[[set]]$features[[feature]]$x) && !is.null(data[[set]]$features[[feature]]$y)){
 
-            feature_points = ppp(cmgo.obj$data[[set]]$features[[feature]]$x, cmgo.obj$data[[set]]$features[[feature]]$y,
-              window=owin(range(cmgo.obj$data[[set]]$features[[feature]]$x), range(cmgo.obj$data[[set]]$features[[feature]]$y))
+            feature_points = ppp(data[[set]]$features[[feature]]$x, data[[set]]$features[[feature]]$y,
+              window=owin(range(data[[set]]$features[[feature]]$x), range(data[[set]]$features[[feature]]$y))
             )
 
             cl$smoothed$projections[[feature]] = nncross(feature_points, centerline_line)
