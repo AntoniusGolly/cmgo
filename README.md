@@ -67,3 +67,19 @@ for(function.file in list.files(paste(path_to_cmgo, "/R",    sep="")) source(pas
 for(data.file     in list.files(paste(path_to_cmgo, "/data", sep="")) load(paste(path_to_cmgo,   "/data/", data.file,     sep=""))
 
 ```
+
+## Documentation
+
+If you have included the R library in your R environment (option 1. of the Installation) you can view the documentation of the package and its functions by typing in your R console:
+
+```R
+# package documentation
+?cmgo
+
+# function documentation
+?cmgo.run # e.g. for the docu of cmgo.run()
+```
+
+We are currently preparing a pdf documentation for users who have sourced the scripts manually.
+
+
