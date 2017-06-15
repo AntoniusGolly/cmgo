@@ -37,7 +37,7 @@ You'll able to see the R documentation of cmgo (type `?cmgo` in the R console) o
 install.packages(c("spatstat", "zoo", "sp", "stringr"))
 
 # installation (required only once)
-install.packages("cmgo", repos="https://raw.githubusercontent.com/AntoniusGolly/cmgo/master", type="source")
+install.packages("cmgo", repos="https://raw.githubusercontent.com/AntoniusGolly/repos/master", type="source")
 
 # include the package (required for every start of an R session)
 library(cmgo)
