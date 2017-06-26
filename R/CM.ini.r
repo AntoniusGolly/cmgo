@@ -1,8 +1,8 @@
 #' Get the global data object
 #'
-#' Create the global data object with data and parameters (information on the global data object in section 
-#' "General information on the global data object). Depending on the arguments passed to 
-#' \code{CM.ini()}, the data are either created from input files, a work space file or from a demo data set. 
+#' Create the global data object with data and parameters (information on the global data object in section
+#' "General information on the global data object). Depending on the arguments passed to
+#' \code{CM.ini()}, the data are either created from input files, a work space file or from a demo data set.
 #' The parameters are either created from defaults, from a parameter file
 #' or merged with a passed list of parameters.
 #'
@@ -33,18 +33,18 @@
 #' @template section_input_data
 #'
 #' @section Demo data sets:
-#' Four demo data sets are available, which contain a few kilometer long section of a channel. The data sets 
-#' differ in the degree of data processing. The data set \strong{demo} only contains the channel bank points, thus 
-#' contains a global data object how it looks directly after reading the input files (check 
-#' structure with \code{str(cmgo.obj$data[[set]]$channel)}). The data set \strong{demo1} has passed the first steps 
+#' Four demo data sets are available, which contain a few kilometer long section of a channel. The data sets
+#' differ in the degree of data processing. The data set \strong{demo} only contains the channel bank points, thus
+#' contains a global data object how it looks directly after reading the input files (check
+#' structure with \code{str(cmgo.obj$data[[set]]$channel)}). The data set \strong{demo1} has passed the first steps
 #' of the processing: CM.generatePolygon() and CM.calculateCenterlin(). Thus, it contains successfully created
 #' centerlines (check structure with \code{str(cmgo.obj$data[[set]]$cl)}). The data set \strong{demo2} has gone through
-#' the full stack of processing of cmgo, e.g. CM.processCenterline() , and all metrics are calculated (check 
-#' structure with \code{str(cmgo.obj$data[[set]]$metrics)}). Thus you can use this data set for testing the 
-#' plotting functions CM.plotPlanView() and CM.plotWidth(). Note, that demo data set demo3 uses the standard 
+#' the full stack of processing of cmgo, e.g. CM.processCenterline() , and all metrics are calculated (check
+#' structure with \code{str(cmgo.obj$data[[set]]$metrics)}). Thus you can use this data set for testing the
+#' plotting functions CM.plotPlanView() and CM.plotWidth(). Note, that demo data set demo3 uses the standard
 #' mode for the calculation of the metrics (default)
 #' and not the reference centerline mode. To see the reference centerline mode in action use data set \strong{demo3}. In addition
-#' to the previously mentioned plotting functions, here also CM.plotBankShift() is available.  
+#' to the previously mentioned plotting functions, here also CM.plotBankShift() is available.
 #'
 #' @param object either a global data object of type list or a string to specify a demo data set (see Details)
 #' @param par either a parameter list, a string to specify a parameter file or NULL to load default parameters (see also \code{\link[=CM.par]{CM.par()}})
@@ -125,6 +125,7 @@ CM.ini <- function(object = "demo", par = NULL){
       data[[set]] = list(
 
         filename = file,
+        survey   = substring(file, 0, rev(gregexpr("\\.", file)[[1]])[1]-1),
         channel  = list(
           x    = table[[par$input.col.easting]],
           y    = table[[par$input.col.northing]],

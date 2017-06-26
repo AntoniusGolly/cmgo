@@ -100,22 +100,39 @@ CM.calculateCenterline <- function(object, set=NULL){
       notice(paste("reason for calculation:", paste(reasons, collapse = " + ")))
 
       # check if parameter matches data base
-      if(isTRUE(data[[set]]$cl$bank.interpolate.max.dist != par$bank.interpolate.max.dist)){ warn("there is a mismatch between the current parameter par$bank.interpolate.max.dist and the dense polygon: re-run CM.generatePolygon()."); return(data); }
+      if(isTRUE(data[[set]]$polygon.bank.interpolate.max.dist != par$bank.interpolate.max.dist)){
+        notice(paste("interpolate max. dist of data:", data[[set]]$polygon.bank.interpolate.max.dist))
+        notice(paste("interpolate max. dist of par: ", par$bank.interpolate.max.dist))
+        warn("there is a mismatch between the current parameter par$bank.interpolate.max.dist and the dense polygon: re-run CM.generatePolygon()."); return(list( data = data,   par  = par));
+      }
+
+      # check if parameter matches data base
+      if(isTRUE(data[[set]]$polygon.bank.reduce.min.dist != par$bank.reduce.min.dist)){
+        notice(paste("reduce min. dist of data:", data[[set]]$polygon.bank.reduce.min.dist))
+        notice(paste("reduce min. dist of par: ", par$bank.reduce.min.dist))
+        warn("there is a mismatch between the current parameter par$bank.reduce.min.dist and the dense polygon: re-run CM.generatePolygon()."); return(list( data = data,   par  = par));
+      }
 
       # create Voronoi/Dirichlet/Thiessen polygons
       notice("step 1 of 5: get voronoi polygons...", TRUE)
-      if(is.null(data[[set]]$cl$paths) || par$force.calc.voronoi || isTRUE(data[[set]]$cl$bank.interpolate.max.dist != data[[set]]$polygon.bank.interpolate.max.dist)){
+      if(is.null(data[[set]]$cl$paths) || par$force.calc.voronoi
+        || isTRUE(data[[set]]$cl$bank.interpolate.max.dist != data[[set]]$polygon.bank.interpolate.max.dist)
+        || isTRUE(data[[set]]$cl$bank.reduce.min.dist      != data[[set]]$polygon.bank.reduce.min.dist)
+      ){
 
         # notice
         notice(paste("calculate based on dense polygon with a maximum bank point distance of ", par$bank.interpolate.max.dist, sep=""))
+        notice(paste("calculate based on dense polygon with a minimum bank point distance of ", par$bank.reduce.min.dist, sep=""))
         reasons = c()
         if(is.null(data[[set]]$cl$paths))                                                      reasons = append(reasons, "data does not exist")
         if(par$force.calc.voronoi)                                                             reasons = append(reasons, "calculation is forced")
-        if(isTRUE(data[[set]]$cl$bank.interpolate.max.dist != par$bank.interpolate.max.dist)) reasons = append(reasons, "max. dist. has changed")
+        if(isTRUE(data[[set]]$cl$bank.interpolate.max.dist != par$bank.interpolate.max.dist))  reasons = append(reasons, "max. dist. has changed")
+        if(isTRUE(data[[set]]$cl$bank.reduce.min.dist      != par$bank.reduce.min.dist))       reasons = append(reasons, "min. dist. has changed")
         notice(paste("reason for calculation:", paste(reasons, collapse = " + ")))
 
         # set meta data: bank.interpolate.max.dist
         data[[set]]$cl$bank.interpolate.max.dist = par$bank.interpolate.max.dist
+        data[[set]]$cl$bank.reduce.min.dist      = par$bank.reduce.min.dist
 
         # reset data
         data[[set]]$cl$cl.paths = NULL
@@ -200,10 +217,14 @@ CM.calculateCenterline <- function(object, set=NULL){
 
           # display interation and check for max
           remove.iteration = remove.iteration + 1
-          if(remove.iteration > par$bank.filter3.max.it){ warn(paste("\n### exit due to maximum iterations (max. iterations = ", par$bank.filter3.max.it, ") ###", "\nNote: this may be caused by gaps that opened in the centerline due to\njagged centerline paths. First, check for gaps visually with CM.plotPlanView(data, par, error=1). \nYou can than either repair these gaps by editing the centerline paths manually or \nsimply increase the bank resolution via parameter par$bank.interpolation.max.dist!", sep=""));
+          if(remove.iteration > par$bank.filter3.max.it){ warn(paste("\n### exit due to maximum iterations (max. iterations = ", par$bank.filter3.max.it, ") ###", "\nNote: this may be caused by gaps that opened in the centerline due to\njagged centerline paths. First, check for gaps visually with CM.plotPlanView(cmgo.obj, set=\"set1\", error=1). \nYou can than either repair these gaps by editing the centerline paths manually or \nsimply increase the bank resolution via parameter par$bank.interpolation.max.dist!", sep=""));
             data[[set]]$cl$errors.filter2       = paths.in.polygon[remove.ixs,          c("x1", "y1")];
             data[[set]]$cl$errors.filter2.first = paths.in.polygon[remove.ixs.first.it, c("x1", "y1")];
-            return(data);
+            data[[set]]$cl$cl.paths             = cl.paths
+            return(list(
+              data = data,
+              par  = par
+            ))
           }
           cat(paste(" > iteration ", remove.iteration, ":", sep=""))
 
@@ -281,10 +302,14 @@ CM.calculateCenterline <- function(object, set=NULL){
             } else {
 
               warn(paste("number of connections should be 1 but is", length(match)))
-              warn("call CM.plotPlanview(data, par, error=1, error.type=\"errors.sort\") to resolve")
+              warn("call CM.plotPlanView(cmgo.obj, set=\"set1\", error=1, error.type=\"errors.sort\") to resolve")
 
               data[[set]]$cl$errors.sort = matrix(this, ncol=2)
-              return(data)
+
+              return(list(
+                data = data,
+                par  = par
+              ))
 
             }
 

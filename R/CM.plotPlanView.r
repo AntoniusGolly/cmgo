@@ -191,6 +191,11 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
       #segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="black", lty=3,lwd=2); leg = leg.add(leg, "cl paths (filtered)", lty=3, lwd=2, col="black")}
     }
 
+    if(!is.null(error)){
+      if(!is.null(data[[set]]$cl$paths))           {segments(data[[set]]$cl$paths$x1, data[[set]]$cl$paths$y1, data[[set]]$cl$paths$x2, data[[set]]$cl$paths$y2, col="lightgray"); leg = leg.add(leg, "voronoi polygons", lty=1, col="gray")}
+      if(!is.null(data[[set]]$cl$cl.paths)){segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="red");leg = leg.add(leg, "cl paths during iteration", lty=1, col="red")}
+    }
+
     # bank points #############################################################
     if(par$plot.planview.bankpoints && !is.null(data[[set]]$channel$x)){
       points(data[[set]]$channel$y ~ data[[set]]$channel$x, pch=19, cex=0.8)
