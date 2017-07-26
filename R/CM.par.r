@@ -77,9 +77,10 @@ CM.par <- function(par.set=NULL){
     input.col.bank              = "Name",      # the column name of the side (left/right bank)
     bank.code.left              = "left",      # the string code used for the left bank
     bank.code.right             = "right",     # the string code used for the right bank
+    bank.reverse.left           = FALSE,       # reverse bank points of left bank from input data
+    bank.reverse.right          = FALSE,       # reverse bank points of right bank from input data
 
     # output settings
-    output.write                = FALSE,       # if [TRUE] output ASCII files will be written
     output.replace              = FALSE,       # if [TRUE] the output files are replaced when existing in CM.writeFiles()
     output.write.centerline     = FALSE,       # if [TRUE] the geometry of the centerline will be written in CM.writeFiles()
     output.write.metrics        = TRUE,        # if [TRUE] the calculated channel metrics will be written in CM.writeFiles()
@@ -87,6 +88,7 @@ CM.par <- function(par.set=NULL){
     output.write.metrics.w      = TRUE,        # switch on/off the variable w (channel width)
     output.write.metrics.r      = TRUE,        # switch on/off the variable r.r and r.l (direction factor of d.r and d.l)
     output.write.metrics.diff   = TRUE,        # switch on/off the variable diff.r and diff.l (distances between two banks)
+    output.write.steps          = FALSE,       #
 
     output.dir                  = "output",
     output.sep                  = "\t",
@@ -97,18 +99,26 @@ CM.par <- function(par.set=NULL){
     plot.planview               = TRUE,        # create a plan view overview plot
     plot.planview.secondary     = TRUE,        # in the plan view plot, add a secodary data set for comparison (will be displayed in dashed lines)
     plot.planview.bankpoints    = FALSE,       # in the plan view plot, add the bank points of a data set
-    plot.planview.polygons      = TRUE,        # in the plan view plot, add the channel borders
+    plot.planview.bankpoints.interpolated = FALSE,       # in the plan view plot, add the interpolated bank points of a data set
+    plot.planview.polygon       = TRUE,        # in the plan view plot, add the channel borders
     plot.planview.voronoi       = FALSE,       # in the plan view plot, add voronoi polygons in plan view plot
     plot.planview.cl.original   = FALSE,       # in the plan view plot, add the rough centerline (before smoothing)
     plot.planview.cl.smoothed   = TRUE,        # in the plan view plot, add the smoothed centerline
+    plot.planview.cl.points     = FALSE,       # when a centerline is plotted should the points representing the line be emphasized
     plot.planview.cl.tx         = FALSE,       # in the plan view plot, add a label with the number next to the centerline points
+    plot.planview.cl.selection  = TRUE,        # if [TRUE] and plot window is determined by cl points (see docu) the cl points are highlighted
+    plot.planview.cl.binned     = FALSE,       # if [TRUE] plot the re-binned centerline produced by CM.resampleCenterline()
     plot.planview.transects     = FALSE,       # in the plan view plot, add transects (perpendiculars to centerline)
     plot.planview.transects.len = 20,          # give the length of transects in the unit of the input coordinates
     plot.planview.dist2banks    = TRUE,        # in the plan view plot, add transect segments from centerline to the banks (left and right)
     plot.planview.grid          = TRUE,        # in the plan view plot, add a grid in the background
     plot.planview.grid.dist     = 20,          # the distance of the grid lines in the unit of the input coordinates
     plot.planview.legend        = TRUE,        # in the plan view plot, add a legend
+    plot.planview.legend.pos    = "topleft",   # keyword to position legend (see ?legend)
     plot.planview.scalebar      = TRUE,        # in the plan view plot, add a scalebar (width of one plot.planview.grid.dist)
+    plot.planview.use.names     = TRUE,        # if [TRUE] set names will be used for display, otherwise "set1", "set2", etc.
+
+    plot.metrics.use.names      = TRUE,        # if [TRUE] set names will be used for display, otherwise "set1", "set2", etc.
 
     # plot options
     plot.zoom                   = TRUE,        # if [TRUE] the plan view plot is zoomed in (see also CM.plotPlanView())
@@ -138,14 +148,30 @@ CM.par <- function(par.set=NULL){
     bank.interpolate.max.dist   = 6,           # if bank.interpolate is [TRUE] this is the maximum distance all bank points will have
     bank.reduce                 = FALSE,       # if [TRUE] the provided bank points are reduced by points that are closer to each other than bank.reduce.min.dist
     bank.reduce.min.dist        = 0.5,         # if bank.reduce is [TRUE] this is the minimum distance all bank point will have
-    bank.filter3.max.it         = 12,          # number of the maximum iterations for filter 3 to prevent the program to run infinitely
+    bank.filter2.max.it         = 12,          # number of the maximum iterations for filter 2 to prevent the program to run infinitely
     centerline.smoothing.width  = 7,           # smoothing window width of mean filter in number of observations (see CM.calculateCenterline())
+    centerline.local.slope.range= 15,
     transects.span              = 3,           # span of centerline points used for calculating the transects (see CM.processCenterline())
     centerline.bin.length       = 5,           # for simplifying the centerline give the spacing in the unit of the input coordinates (see CM.reduceCenterline())
     centerline.use.reference    = FALSE,       # sets method for calculating distance centerline to banks, if [FALSE] (default) each river profile will be compared to its own centerline, if [TRUE] the centerline of centerline.reference will be taken (see CM.processCenterline())
     centerline.reference        = "set1",      # sets the reference data set if centerline.use.reference is [TRUE]
     calculate.metrics           = TRUE,        # if [TRUE] all centerline metrics are calculated (see CM.processCenterline())
     force.calc.metrics          = FALSE,       # if [TRUE] the metrics  are always re-calculated and never taken from cache
+
+    # step identification after Zimmermann et. al 2008 [Zimmermann, A.E., Church, M., and Hassan, M. a., 2008, Identification of steps and pools from stream longitudinal profile data: Geomorphology, v. 102, no. 3–4, p. 395–406, doi: 10.1016/j.geomorph.2008.04.009.)]
+    steps.identify              = TRUE,
+    steps.verbose               = FALSE,       # should there be
+    steps.thalweg.dist          = "3d",        # chose method of distance calculation "3d" or "2d"
+    steps.minimum.step.length   = 2.25,        # as percentage of Wb [%]
+    steps.maximum.step.length   = 200,         # as percentage of Wb [%]
+    steps.minimum.pool.length   = 10,          # as percentage of Wb [%]
+    steps.minimum.residual.depth= 0.23,        # as percentage of Wb [%]
+    steps.minimum.drop.height   = 3.3,         # as percentage of Wb [%]
+    steps.minimum.step.slope    = 10,          # average slope + 10 degree [°]
+    steps.bank.full.width.fix   = TRUE,        # TRUE: use a fix bank full width for the whole stream, FALSE: calculate from banks
+    steps.bank.full.width       = 3.7,         # [m]
+    steps.average.slope.fix     = FALSE,
+    steps.average.slope         = 12.5,        #8.34, #12.5,         # [°]
 
     # ignore
     dummy = TRUE

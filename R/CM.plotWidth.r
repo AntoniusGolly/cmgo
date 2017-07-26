@@ -111,11 +111,11 @@ CM.plotWidth <- function(object, set="set1", set.compare=NULL, cl=NULL, d=NULL){
 
     if(!is.null(d)){
       if(length(d) == 1) d = c(d-25, d+25)
-      if(d[1] < 0 ) d[1] = 0; if(d[2] >  tail(data[[set]]$cl$smoothed$length, n=1)) d[2] = tail(data[[set]]$cl$smoothed$length, n=1)
+      if(d[1] < 0 ) d[1] = 0; if(d[2] >  tail(data[[set]]$cl$smoothed$cum_dist_2d, n=1)) d[2] = tail(data[[set]]$cl$smoothed$cum_dist_2d, n=1)
       if(length(d) == 2) d = seq(from = d[1], to = d[2])
       cl = seq(
-        from = which.min(abs(data[[set]]$cl$smoothed$length - d[1])),
-        to   = which.min(abs(data[[set]]$cl$smoothed$length - d[length(d)]))
+        from = which.min(abs(data[[set]]$cl$smoothed$cum_dist_2d - d[1])),
+        to   = which.min(abs(data[[set]]$cl$smoothed$cum_dist_2d - d[length(d)]))
       )
       notice(paste("d range: distance", d[1], "to", d[length(d)]))
     }
@@ -126,27 +126,27 @@ CM.plotWidth <- function(object, set="set1", set.compare=NULL, cl=NULL, d=NULL){
 
     leg = list()
 
-    y.lim = range(data[[set]]$metrics$w[cl])
+    y.lim = range(data[[set]]$metrics$w[cl], na.rm=TRUE)
     if(!is.null(set.compare)) y.lim = range(data[[set]]$metrics$w[cl],data[[set.compare]]$metrics$w[cl])
 
     plot(
       0,
       main = paste("Channel width of", set, if(!is.null(set.compare)) paste("(solid) and", set.compare, " (dashed)") else ""),
       ylim = y.lim,
-      xlim = c(data[[set]]$cl$smoothed$length[cl[1]],data[[set]]$cl$smoothed$length[cl[length(cl)]]),
+      xlim = c(data[[set]]$cl$smoothed$cum_dist_2d[cl[1]],data[[set]]$cl$smoothed$cum_dist_2d[cl[length(cl)]]),
       xlab = paste("Distance downstream [", par$input.unit, "]", sep=""),
       ylab = paste("Width [", par$input.unit, "]", sep=""),
       type = "n"
     )
 
     ## channel width main set
-    lines(data[[set]]$metrics$w ~ data[[set]]$cl$smoothed$length,                    col = "blue", lty=1, lwd=2)
-    leg = leg.add(leg, paste("channel width of", set),                               col = "blue", lty=1, lwd=2)
+    lines(data[[set]]$metrics$w ~ data[[set]]$cl$smoothed$cum_dist_2d,                    col = "blue", lty=1, lwd=2)
+    leg = leg.add(leg, paste("channel width of", set),                                    col = "blue", lty=1, lwd=2)
 
     ## channel width compare set
     if(!is.null(set.compare)){
-      lines(data[[set.compare]]$metrics$w ~ data[[set.compare]]$cl$smoothed$length,  col = "green", lty=1, lwd=2)
-      leg = leg.add(leg, paste("channel width of", set.compare),                     col = "green", lty=1, lwd=2)
+      lines(data[[set.compare]]$metrics$w ~ data[[set.compare]]$cl$smoothed$cum_dist_2d,  col = "green", lty=1, lwd=2)
+      leg = leg.add(leg, paste("channel width of", set.compare),                          col = "green", lty=1, lwd=2)
 
       notice(paste("added ", set.compare, " (reference ", data[[set.compare]]$metrics$cl.ref, ") for comparison", sep=""))
 

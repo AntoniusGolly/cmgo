@@ -44,7 +44,7 @@
 #' plotting functions CM.plotPlanView() and CM.plotWidth(). Note, that demo data set demo3 uses the standard
 #' mode for the calculation of the metrics (default)
 #' and not the reference centerline mode. To see the reference centerline mode in action use data set \strong{demo3}. In addition
-#' to the previously mentioned plotting functions, here also CM.plotBankShift() is available.
+#' to the previously mentioned plotting functions, here also CM.plotMetrics() is available.
 #'
 #' @param object either a global data object of type list or a string to specify a demo data set (see Details)
 #' @param par either a parameter list, a string to specify a parameter file or NULL to load default parameters (see also \code{\link[=CM.par]{CM.par()}})
@@ -71,6 +71,10 @@ CM.ini <- function(object = "demo", par = NULL){
 
   notice    = function(x,prim=FALSE){ cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n") }
   error     = function(x){stop(x, call.=FALSE)}
+
+  # print program information to the screen
+  cat(rep("\n",10), "\n", paste(rep("-",54), collapse=""), "\n---", paste(rep(" ",48), collapse=""), "---\n---", paste(rep(" ",15), collapse=""),"ChannelMetrics v.1",paste(rep(" ",15), collapse=""),"---\n---", paste(rep(" ",48), collapse=""), "---\n",paste(rep("-",54), collapse=""),  "\nv.1.00 by Antonius Golly (golly@gfz-potsdam.de)\n", sep="");
+
 
   # user notice
   notice("load data", TRUE)
@@ -107,9 +111,9 @@ CM.ini <- function(object = "demo", par = NULL){
 
       }
 
-    }
+    } else { notice(paste("workspace", par$workspace.filename, "does not exist!"))}
 
-  }
+  } else { notice("workspace reading disabled")}
 
   files = list.files(par$input.dir)
   if(length(files) > 0 ){
@@ -134,6 +138,26 @@ CM.ini <- function(object = "demo", par = NULL){
         )
 
       )
+
+      ix.l = which(data[[set]]$channel$bank == par$bank.code.left)
+      ix.r = which(data[[set]]$channel$bank == par$bank.code.right)
+
+      if(par$bank.reverse.left){
+
+        data[[set]]$channel$x[ix.l] = rev(data[[set]]$channel$x[ix.l])
+        data[[set]]$channel$y[ix.l] = rev(data[[set]]$channel$y[ix.l])
+        data[[set]]$channel$z[ix.l] = rev(data[[set]]$channel$z[ix.l])
+
+      }
+
+      if(par$bank.reverse.right){
+
+        data[[set]]$channel$x[ix.r] = rev(data[[set]]$channel$x[ix.r])
+        data[[set]]$channel$y[ix.r] = rev(data[[set]]$channel$y[ix.r])
+        data[[set]]$channel$z[ix.r] = rev(data[[set]]$channel$z[ix.r])
+
+      }
+
 
       notice(paste("file '", file, "' assigned to ", set, sep=""))
 

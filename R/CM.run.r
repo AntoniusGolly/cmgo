@@ -48,8 +48,6 @@ CM.run <- function(object = NULL, par = NULL){
   #par  = if(is.null(par)) object$par else CM.par(par)
   #data = object$data
 
-  # print program information to the screen
-  cat(rep("\n",10), "\n", paste(rep("-",54), collapse=""), "\n---", paste(rep(" ",48), collapse=""), "---\n---", paste(rep(" ",15), collapse=""),"ChannelMetrics v.1",paste(rep(" ",15), collapse=""),"---\n---", paste(rep(" ",48), collapse=""), "---\n",paste(rep("-",54), collapse=""),  "\nv.1.00 by Antonius Golly (golly@gfz-potsdam.de)\n", sep="");
 
   ### define parameters
   par  = CM.par(par)

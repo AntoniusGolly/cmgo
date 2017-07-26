@@ -14,7 +14,7 @@
 #' plot.planview               = TRUE,        # plot an plan view overview plot
 #' plot.planview.secondary     = TRUE,        # plot a secondary channel polygon to the plot (for comparison of data sets)
 #' plot.planview.bank.points   = TRUE,        # plot channel bank points
-#' plot.planview.polygons      = TRUE,        # plot channel bank polygons
+#' plot.planview.polygon       = TRUE,        # plot channel bank polygon
 #' plot.planview.voronoi       = TRUE,        # plot voronoi polygons in plan view plot
 #' plot.planview.cl.original   = FALSE,       # plot centerline in plan view plot
 #' plot.planview.cl.smoothed   = TRUE,        # plot centerline in plan view plot
@@ -31,6 +31,7 @@
 #'
 #' @template param_global_data_object
 #' @param set the data set to be plotted, "set1" if not specified. See documentation of CM.ini() to learn about data sets.
+#' @param title a title printed above the plot, if not specified a title will be composed from the enabled plot elements
 #' @param set.compare a second data set to be plotted in light color for comparison
 #' @param extent a string defining the plotting extent of the map (specifying an object of the list in par$plot.zoom.extents) or NULL (the default extent of par$plot.zoom.extent is taken)
 #' @param zoom defines if plot is zoomed (TRUE) or not (FALSE). In case of NULL (default) the value of par$plot.zoom is taken
@@ -40,7 +41,7 @@
 #' @param error.type a string specifying which errors should be investigated ("errors.filter2", "errors.filter2.first" or "errors.sort")
 #' @param x an x-coordinate where the map is centered at
 #' @param y an y-coordinate where the map is centered at
-#' @return a list of applied plot parameters (this is useful for plotting the same extent in CM.plotBankShift())
+#' @return a list of applied plot parameters (this is useful for plotting the same extent in CM.plotMetrics())
 #' @author Antonius Golly
 #' @examples
 #' # get demo data (find instructions on how to use own data in the documentation of CM.ini())
@@ -51,7 +52,7 @@
 #'
 #' @export CM.plotPlanView
 
-CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, zoom = TRUE, zoom.length = NULL, cl=NULL, error=NULL, error.type="errors.filter2", x=NULL, y=NULL){
+CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, extent=NULL, zoom = FALSE, zoom.length = NULL, cl=NULL, error=NULL, error.type="errors.filter2", x=NULL, y=NULL){
 
   par  = object$par
   data = object$data
@@ -76,7 +77,7 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
 
   }
 
-  leg.make = function(leg){
+  leg.make = function(leg, par){
 
     if(length(leg) == 0) return(NULL)
 
@@ -93,7 +94,7 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
 
     leg.vec = function(x) return(if(length(unique(x))==1) x[1] else x)
 
-    legend("topleft", inset = 0.05,
+    legend(par$plot.planview.legend.pos, inset = 0.05,
       legend = leg.vec(tx),
       lwd    = leg.vec(lwd),
       lty    = leg.vec(lty),
@@ -104,7 +105,7 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
   }
 
   #dev.new(width=6, height=10)
-  par(mfrow=c(1,1))
+  #par(mfrow=c(1,1))
   notice("create plan view plot", TRUE)
 
   #for(plot in plots){
@@ -167,11 +168,15 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
     leg = list()
 
 
+    ### build set names ###
+    name.set           = if(par$plot.planview.use.names) data[[set]]$survey else set
+    name.set.ref       = if(set.ref != FALSE) {if(par$plot.planview.use.names) data[[set.ref]]$survey else set.ref} else "not used"
+    name.set.secondary = if(!is.null(set.secondary)) {if(par$plot.planview.use.names) data[[set.secondary]]$survey else set.secondary} else "not used"
 
 
     ### create empty plot ###
     plot(0,
-      main = paste("Plan view of", set, if(par$plot.planview.secondary){ paste("(solid) and", if(is.null(set.compare)) "reference ", set.secondary, "(dashed)")}),
+      main = if(is.null(title)){ paste("Plan view of", name.set, if(!is.null(set.compare)){ paste("(solid) and", if(is.null(set.compare)) "reference", name.set.secondary, "(dashed)")})} else {title},
       xlim = if(zoom) plot.x + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$x),
       ylim = if(zoom) plot.y + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$y),
       asp=1, type="n", xlab="X", ylab="Y"
@@ -196,22 +201,10 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
       if(!is.null(data[[set]]$cl$cl.paths)){segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="red");leg = leg.add(leg, "cl paths during iteration", lty=1, col="red")}
     }
 
-    # bank points #############################################################
-    if(par$plot.planview.bankpoints && !is.null(data[[set]]$channel$x)){
-      points(data[[set]]$channel$y ~ data[[set]]$channel$x, pch=19, cex=0.8)
-      leg = leg.add(leg, paste("bank points of", set), pch=19, col="black", cex=0.8)
-    }
-
-    # channel bank polygons ###################################################
-    if(par$plot.planview.polygons && !is.null(data[[set]]$polygon)){
-      lines(data[[set]]$polygon$y ~ data[[set]]$polygon$x, col="black")
-      leg = leg.add(leg, paste("banks of", set), lty=1, col="black")
-    }
-
     # second polygon for comparison
-    if(par$plot.planview.secondary && !is.null(set.secondary)){
+    if(!is.null(set.secondary) && set.secondary != set){
       lines( data[[set.secondary]]$polygon$y ~ data[[set.secondary]]$polygon$x, lty=2, col="gray")
-      leg = leg.add(leg, paste("banks of", set.secondary), lty=2, col="gray")
+      leg = leg.add(leg, paste("banks of", name.set.secondary), lty=2, col="gray")
     }
 
     # tr = transects ##########################################################
@@ -227,22 +220,41 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
     if(par$plot.planview.dist2banks && !is.null(data[[set]]$metrics$tr) && !is.null(data[[set]]$metrics$cp.r) && !is.null(data[[set]]$metrics$cp.l)){
       apply(cbind(data[[set]]$metrics$cp.r[,c(1,2)], data[[set]]$metrics$tr[,c(3,4)]), 1, function(x){  segments(x[1], x[2], x[3], x[4], col="green") })
       apply(cbind(data[[set]]$metrics$cp.l[,c(1,2)], data[[set]]$metrics$tr[,c(3,4)]), 1, function(x){  segments(x[1], x[2], x[3], x[4], col="red")   })
-      leg = leg.add(leg, paste("right bank of", set, "to reference of", data[[set]]$metrics$cl.ref), lty=1, col="green")
-      leg = leg.add(leg, paste("left bank of",  set, "to reference of", data[[set]]$metrics$cl.ref), lty=1, col="red")
+      leg = leg.add(leg, paste("right bank of", name.set, "to reference of", data[[set]]$metrics$cl.ref), lty=1, col="green")
+      leg = leg.add(leg, paste("left bank of",  name.set, "to reference of", data[[set]]$metrics$cl.ref), lty=1, col="red")
+    }
+
+    # bank points #############################################################
+    if(par$plot.planview.bankpoints && !is.null(data[[set]]$channel$x)){
+      points(data[[set]]$channel$y ~ data[[set]]$channel$x, pch=19, cex=0.8)
+      leg = leg.add(leg, paste("bank points of", name.set), pch=19, col="black", cex=0.8)
+    }
+
+    if(par$plot.planview.bankpoints.interpolated && !is.null(data[[set]]$polygon$x)){
+      points(data[[set]]$polygon$y ~ data[[set]]$polygon$x, pch=19, cex=0.5)
+    }
+
+    # channel bank polygon ####################################################
+    if(par$plot.planview.polygon && !is.null(data[[set]]$polygon)){
+      lines(data[[set]]$polygon$y ~ data[[set]]$polygon$x, col="black")
+      leg = leg.add(leg, paste("banks of", name.set), lty=1, col="black")
     }
 
     # centerline ##############################################################
-    if(par$plot.planview.cl.original) lines(data[[set]]$cl$original$y  ~ data[[set]]$cl$original$x, col="red", lwd = 1.5)
+    if(par$plot.planview.cl.original){
+      lines(data[[set]]$cl$original$y  ~ data[[set]]$cl$original$x, col="red", lwd = 1.5)
+      leg = leg.add(leg, paste("original centerline of", name.set, if(set==set.ref)"(reference)"), lty=1, lwd = 1, cex=0.4, col="red")
+    }
     if(par$plot.planview.cl.smoothed && !is.null(data[[set]]$cl$smoothed)){
       lines( data[[set]]$cl$smoothed$y ~ data[[set]]$cl$smoothed$x, col="blue",lwd = if(set==set.ref) 2.5 else 1)
-      points(data[[set]]$cl$smoothed$y ~ data[[set]]$cl$smoothed$x, cex=0.4, pch=19, col="blue")
-      leg = leg.add(leg, paste("centerline of", set, if(set==set.ref)"(reference)"), lty=1, pch=19, lwd = if(set==set.ref) 2.5 else 1, cex=0.4, col="blue")
+      if(par$plot.planview.cl.points) points(data[[set]]$cl$smoothed$y ~ data[[set]]$cl$smoothed$x, cex=0.4, pch=19, col="blue")
+      leg = leg.add(leg, paste("centerline of", name.set, if(set==set.ref)"(reference)"), lty=1, pch=19, lwd = if(set==set.ref) 2.5 else 1, cex=0.4, col="blue")
 
       # secondary
-      if(par$plot.planview.secondary && !is.null(set.secondary) && set.secondary != set){
+      if(!is.null(set.secondary) && set.secondary != set){
         lines(data[[set.secondary]]$cl$smoothed$y  ~ data[[set.secondary]]$cl$smoothed$x, lwd = if(set.secondary == set.ref) 2.5 else 1, col="blue")
-        points(data[[set.secondary]]$cl$smoothed$y ~ data[[set.secondary]]$cl$smoothed$x, cex=0.4, pch=19, col="blue")
-        leg = leg.add(leg, paste("centerline of", set.secondary, if(set.secondary == set.ref) paste("(reference of ", set, ")", sep="")), pch=19, cex=0.4, lwd = if(set.secondary == set.ref) 2.5 else 1, col="blue", lty=1)
+        if(par$plot.planview.cl.points) points(data[[set.secondary]]$cl$smoothed$y ~ data[[set.secondary]]$cl$smoothed$x, cex=0.4, pch=19, col="blue")
+        leg = leg.add(leg, paste("centerline of", name.set.secondary, if(set.secondary == set.ref) paste("(reference of ", name.set, ")", sep="")), pch=19, cex=0.4, lwd = if(set.secondary == set.ref) 2.5 else 1, col="blue", lty=1)
       }
 
       # numbering
@@ -254,13 +266,20 @@ CM.plotPlanView <- function(object, set="set1", set.compare=NULL, extent=NULL, z
     }
 
     # cl range ################################################################
-    if(!is.null(cl)){
-      points(data[[set.cl.ref]]$cl$smoothed$x[cl], data[[set.cl.ref]]$cl$smoothed$y[cl], pch=1, col="orange", cex=1.1)
-      leg = leg.add(leg, "cl range selection", pch=1, col="orange", cex=1.1)
+    if(!is.null(cl) && par$plot.planview.cl.selection){
+      points(data[[set.cl.ref]]$cl$smoothed$x[cl], data[[set.cl.ref]]$cl$smoothed$y[cl], pch=19, col="red", cex=0.8)
+      leg = leg.add(leg, "cl range selection", pch=19, col="red", cex=0.8)
+    }
+
+    # cl-binned ###############################################################
+    if(par$plot.planview.cl.binned){
+      points(data[[set.cl.ref]]$cl$binned$x, data[[set.cl.ref]]$cl$binned$y, pch=18, col="blue", cex=2.2)      
+      #points(data[[set.cl.ref]]$cl$binned$bin_x, data[[set.cl.ref]]$cl$binned$bin_y, pch=18, col="blue", cex=2.2)      
+      leg = leg.add(leg, "re-binned centerline", pch=18, col="blue", cex=1.2)
     }
 
     # legend and scale bar ####################################################
-    if(par$plot.planview.legend) leg.make(leg)
+    if(par$plot.planview.legend) leg.make(leg, par)
     if(par$plot.planview.scalebar){
       segments(
         plot.x + 0.5 * zoom.length - par$plot.planview.grid.dist,

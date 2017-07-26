@@ -44,10 +44,12 @@
 #' @name cmgo
 #' @importFrom grDevices colors dev.copy dev.copy2pdf dev.off graphics.off png
 #' @importFrom graphics abline legend lines plot points segments text
-#' @importFrom stats lm median
+#' @importFrom stats lm median princomp
 #' @importFrom utils data head modifyList read.table tail write.table str
 #' @importFrom stringr str_pad
 #' @importFrom spatstat dirichlet ppp psp owin nncross
 #' @importFrom sp point.in.polygon
 #' @importFrom zoo rollapply
+#' @importFrom rgl clear3d plot3d abclines3d segments3d points3d
+#' @importFrom shapefiles convert.to.shapefile write.shapefile
 NULL

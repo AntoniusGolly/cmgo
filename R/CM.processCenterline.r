@@ -128,6 +128,7 @@ CM.processCenterline <- function(object, set=NULL){
 
   CM.linearEquationsTransects = function(x){
 
+    # x has to be matrix representing x-y-pairs of centerline points in the number of transects.span
     if(!is.matrix(x)) return(F)
 
     # first and last elements represent averages over moving window
@@ -136,7 +137,7 @@ CM.processCenterline <- function(object, set=NULL){
     y1 = head(as.matrix(x)[,2], n=1)
     y2 = tail(as.matrix(x)[,2], n=1)
 
-    # calculate slope (m) and center point (P)
+    # calculate orientation (m) and center point (P) of transect vectors
     m  = -1 / ((( y2 - y1 ) / ( x2 - x1 )))
     Px = (( x2 - x1 ) / 2 ) + x1
     Py = (( y2 - y1 ) / 2 ) + y1
@@ -147,21 +148,22 @@ CM.processCenterline <- function(object, set=NULL){
 
   }
 
-  set = "set2" # ignore, only for debuggin
+  set = "set2" # ignored, only for debugging
 
   for(set in sets){
 
     if(par$calculate.metrics){
 
-      if(is.null(data[[set]]$metrics) || par$force.calc.metrics){
+      if(is.null(data[[set]]$metrics) || par$force.calc.metrics || !identical(data[[set]]$metrics$tr.span, par$transects.span)){
 
         cl.type = "smoothed" # it is highly recommended to do the processing on the "smoothed" version of the centerline
         set.ref  = if(par$centerline.use.reference) par$centerline.reference else set
 
-        notice(paste("process data set '", set, "' with centerline reference '", set.ref,"' now...", sep=""))
+        notice(paste("process data set '", set, "' with centerline reference '", set.ref,"' now...", sep=""), TRUE)
         reasons = c()
         if(is.null(data[[set]]$metrics))     reasons = append(reasons, "data does not exis")
         if(par$force.calc.metrics)           reasons = append(reasons, "calculation is forced")
+        if(!identical(data[[set]]$metrics$tr.span, par$transects.span)) reasons = append(reasons, "tr spans differ")
         notice(paste("reason for calculation:", paste(reasons, collapse = " + ")))
 
 
@@ -197,6 +199,7 @@ CM.processCenterline <- function(object, set=NULL){
         # store
         data[[set]]$metrics$cl.ref   = set.ref
         data[[set]]$metrics$cl.type  = cl.type
+        data[[set]]$metrics$tr.span  = par$transects.span
 
         data[[set]]$metrics$tr       = tr
         data[[set]]$metrics$cp.r     = cp.r[,c(1,2)]
@@ -209,7 +212,451 @@ CM.processCenterline <- function(object, set=NULL){
         data[[set]]$metrics$diff.r   = if(set == set.ref) rep(0, length(w)) else -(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r - d.r * cp.r[,3])
         data[[set]]$metrics$diff.l   = if(set == set.ref) rep(0, length(w)) else   data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l - d.l * cp.l[,3]
 
-        notice("centerline processed successfully!")
+        ### project features onto centerline
+        if(typeof(data[[set]]$features) == "list"){
+
+          notice("feature list found!")
+
+          cl = data[[set]]$cl
+
+          nrp = length(cl$smoothed$x)
+
+          ## create ppp feature
+          centerline_points = ppp(
+            cl$smoothed$x,
+            cl$smoothed$y,
+            window=owin(range(cl$smoothed$x), range(cl$smoothed$y))
+          )
+
+          for(feature in names(data[[set]]$features)){
+
+            notice(paste("processing feature '", feature, "'...", sep=""))
+
+            if(!is.null(data[[set]]$features[[feature]]$x) && !is.null(data[[set]]$features[[feature]]$y)){
+
+              ## create ppp feature
+              feature_points = ppp(
+                data[[set]]$features[[feature]]$x,
+                data[[set]]$features[[feature]]$y,
+                window=owin(range(data[[set]]$features[[feature]]$x), range(data[[set]]$features[[feature]]$y))
+              )
+
+              # project centerline to feature and store in $feature
+              prj_to_feature = nncross(feature_points, centerline_points)
+              data[[set]]$features[[feature]]$cl_index = prj_to_feature$which
+
+              # project feature to centerline and store in $centerline
+              prj_to_cl = nncross(centerline_points, feature_points)
+              data[[set]]$metrics[[paste(feature, "_which", sep="")]] = prj_to_cl$which
+              data[[set]]$metrics[[paste(feature, "_dist",  sep="")]] = prj_to_cl$dist
+              for(variable in names(data[[set]]$features[[feature]][- which(names(data[[set]]$features[[feature]]) %in% c("x", "y", "cl_index"))])){
+                data[[set]]$metrics[[paste(feature, "_", variable,  sep="")]] = data[[set]]$features[[feature]][[variable]][prj_to_cl$which]
+              }
+
+              # calculate 2d dist
+              diffs = diff(as.matrix(data[[set]]$features[[feature]][which(names(data[[set]]$features[[feature]]) %in% c("x", "y"))]))
+              data[[set]]$features[[feature]]$seg_dist_2d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2))
+              data[[set]]$features[[feature]]$cum_dist_2d = cumsum(data[[set]]$features[[feature]]$seg_dist_2d)
+
+              # calculate 3d dist
+              if(!is.null(data[[set]]$features[[feature]]$z)){
+                diffs = diff(as.matrix(data[[set]]$features[[feature]][which(names(data[[set]]$features[[feature]]) %in% c("x", "y", "z"))]))
+                data[[set]]$features[[feature]]$seg_dist_3d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2 + diffs[,"z"]^2))
+                data[[set]]$features[[feature]]$cum_dist_3d = cumsum(data[[set]]$features[[feature]]$seg_dist_3d)
+              }
+
+              notice(paste("feature '", feature, "' projected to centerline", sep=""))
+
+            } else { warning("feature does not contain proper x,y coordinates lists!") }
+
+          }
+
+        }
+
+        notice("features processed successfully!")
+
+
+
+        # # #
+        if(par$steps.identify){
+
+          notice("identify steps in long profile...", TRUE)
+
+          if(!is.null(data[[set]]$features$lp)){
+
+            # set parameters
+            sl_min  = par$steps.minimum.step.length    * par$steps.bank.full.width / 100
+            sl_max  = par$steps.maximum.step.length    * par$steps.bank.full.width / 100
+            pl_min  = par$steps.minimum.pool.length    * par$steps.bank.full.width / 100
+            rd_min  = par$steps.minimum.residual.depth * par$steps.bank.full.width / 100
+            dh_min  = par$steps.minimum.drop.height    * par$steps.bank.full.width / 100
+            ssl_min = par$steps.minimum.step.slope     + par$steps.average.slope
+            ssg_min = tan(ssl_min/360 * (2*pi)) * 100
+            slope   = if(par$steps.average.slope.fix) par$steps.average.slope else {
+              # calculate slope based on elevation and length of long profile
+              slope = atan(diff(range(data[[set]]$features$lp$z)) / tail(data[[set]]$features$lp$cum_dist_2d, n=1)) * 360 / (2*pi)
+            }
+
+            notice("****** parameters **************************************************************")
+            notice(paste("min step length (sl_min = ",    par$steps.minimum.step.length,    "% of bank full width): ", sl_min, "[m]", sep=""));
+            notice(paste("max step length (sl_max = ",    par$steps.maximumg.step.length,   "% of bank full width): ", sl_max, "[m]", sep=""));
+            notice(paste("min pool length (pl_min = ",    par$steps.minimum.pool.length,    "% of bank full width): ", pl_min, "[m]", sep=""));
+            notice(paste("min residual depth (rd_min = ", par$steps.minimum.residual.depth, "% of bank full width): ", rd_min, "[m]", sep=""));
+            notice(paste("min drop height (dh_min = ",    par$steps.minimum.drop.height,    "% of bank full width): ", dh_min, "[m]", sep=""));
+            notice(paste("min step slope (ssl_min = ",    par$steps.minimum.step.slope,     "deg greater than mean slope): ", ssl_min, "[deg]  ", sep=""));
+            notice("********************************************************************************")
+
+            # prepare variables
+            lp           = data[[set]]$features$lp
+            steps        = data.frame()
+            verbose      = par$steps.verbose
+            step.i       = 0
+            nr.of.checks = 4
+            crash.i      = 0
+            ix           = 1
+
+            notice("identified steps:")
+            checks = "start iteration:"
+
+            while(ix < length(lp$id)){
+
+              crash.i = crash.i + 1; if(crash.i > 50000){ stop("program crashed!"); break;}
+
+              ix.add = 0
+
+              #if(Parameters$step.max) if(nrow(steps) >= Parameters$step.max.count) break;
+
+              if(verbose) notice(paste("index: ", ix, " / dist_cum: ", round(lp$cum_dist_2d[ix], digits=2), sep=""))
+
+              # reset checks
+              checks = rep(FALSE, nr.of.checks)
+
+              # set indices
+              ixl = ix + 1     # start looking from the next point on
+              ixr = ix + 40    # end after 40 points
+              if(ixr > length(lp$id)) ixr = length(lp$id)
+
+              # actual point
+              lpx  = lp$x[ix]
+              lpy  = lp$y[ix]
+              lpz  = lp$z[ix]
+              lpd  = lp$cum_dist_2d[ix]
+
+              # i-points to check
+              lpxi = lp$x[c(ixl:ixr)]                               # all points upstream of ix (end of pool) excluding ix
+              lpyi = lp$y[c(ixl:ixr)]                               # all points upstream of ix (end of pool) excluding ix
+              lpzi = lp$z[c(ixl:ixr)]                               # all points upstream of ix (end of pool) excluding ix
+              lpdi = lp$cum_dist_2d[c(ixl:ixr)]                     # cumulative distances
+              lpfi = ( ( lpxi - lpx )^2  + ( lpyi - lpy )^2 )^(1/2) # real distances from end of pool upstream
+
+              # get distances of points
+              dist3d = ( ( lpxi - lpx )^2 + ( lpyi - lpy )^2 + ( lpzi - lpz )^2 )^(1/2)
+              dist2d = ( ( lpxi - lpx )^2 + ( lpyi - lpy )^2  )^(1/2)
+
+              ### check 1: higher than the next point?
+              if(lpz > lpzi[1])          checks[1] = TRUE
+              else{ ix = ix+1; next }
+
+              ### check 2: highest point in elevation among all points upstream that fall within a minimum pool length
+              if(all(lpzi < lpz)){ notice("end of lp reached"); break;}
+              first_higher_point = min(which((lpz > lpzi) == FALSE))
+              last_lower_point   = first_higher_point - 1                                              # pl_min.pts = which(dist2d > pl_min)
+
+              if(dist2d[last_lower_point]>pl_min) checks[2] = TRUE
+              else { ix = ix+1; next }
+
+              # generate interpolated point
+              lp_llp = c(lpxi[last_lower_point],   lpyi[last_lower_point],   lpzi[last_lower_point])   # LongProfile_LastLowerPoint
+              lp_fhp = c(lpxi[first_higher_point], lpyi[first_higher_point], lpzi[first_higher_point]) # LongProfile_FirstHigherPoint
+              lp_h   = lp_fhp - lp_llp                                                                 # LongProfile_Helpingpoint
+              lambda = (lpz -lp_llp[3]) / lp_h[3]
+              lp_sp  = c(lp_llp[1] + (lp_h[1] * lambda), lp_llp[2] + (lp_h[2] * lambda), lpz)          # LongProfile_StartPool (interpolated point)
+
+              # calculate cum. dist of interpolated start of pool point (for plotting, cum. distances are required)
+              lpd_sp = lpdi[last_lower_point] - lpd                                                    # LongProfileDistance_StartPool
+              if(par$steps.thalweg.dist == "2d") lpd_sp = lpd_sp + ( ( lp_sp[1] - lpxi[last_lower_point] )^2 + ( lp_sp[2] - lpyi[last_lower_point] )^2 ) ^(1/2)
+              if(par$steps.thalweg.dist == "3d") lpd_sp = lpd_sp + ( ( lp_sp[1] - lpxi[last_lower_point] )^2 + ( lp_sp[2] - lpyi[last_lower_point] )^2 + ( lp_sp[3] - lpzi[last_lower_point] )^2 ) ^(1/2)
+
+              # calculate real pool length
+              pool.length  = ( ( lp_sp[1] - lpx )^2 + ( lp_sp[2] - lpy )^2 ) ^(1/2)
+
+              # calculate residual depth
+              pool.depth.ix = which.min(lp$z[ix + seq(1, last_lower_point)])
+              pool.depth.z  = min( lp$z[ix + seq(1, last_lower_point)] )
+              pool.depth.r  = lpz - pool.depth.z
+
+              ### check 3: min residual depth
+              if(pool.depth.r >= rd_min) checks[3] = TRUE
+              else { ix = ix + first_higher_point; next }
+
+              # re-calculate real distances
+              step.lengths = ( ( lpxi[first_higher_point:length(lpxi)] - lp_sp[1] )^2  + ( lpyi[first_higher_point:length(lpyi)] - lp_sp[2] )^2 )^(1/2) # real distances from end of pool upstream
+
+              # find start of step (first point above lp_sp for which min. step drop height and min step length applies)
+              if(!any( (lpzi[first_higher_point:length(lpzi)] - lpz) > dh_min)){ notice("end of lp reached"); break;}
+              first_top_point = first_higher_point - 1 + max(
+                min(which( (lpzi[first_higher_point:length(lpzi)] - lpz) > dh_min)), # minimum drop height
+                min(which( step.lengths > sl_min ))                                  # minimum step length (not pool length), step length == length from start of pool (end of step) to first_top_point
+              )
+
+
+
+              # point cloud calculations ############################################################
+
+              gr.ix      = 0
+              r.squared  = 0;
+              ssl        = 0
+              group      = list()
+              pointcloud = TRUE
+              while(pointcloud){
+
+                if(verbose) notice(paste("_________________ ix", ix, "_________________"))
+
+                crash.i = crash.i + 1; if(crash.i > 5000){ error("program crashed!"); break;}
+
+                if(first_top_point + gr.ix > length(lpxi)) {notice("end of point cloud!"); break;}
+
+                # point cloud of points to fit
+                slx  = c(lp_sp[1], lpxi[first_higher_point : ( first_top_point + gr.ix )])
+                sly  = c(lp_sp[2], lpyi[first_higher_point : ( first_top_point + gr.ix )])
+                slz  = c(lp_sp[3], lpzi[first_higher_point : ( first_top_point + gr.ix )])
+                slz0 = rep(min(slz), length(slz))
+
+                # re-calculate step length
+                step.length = ( ( slx[1] - slx[length(slx)] )^2  + ( sly[1] - sly[length(sly)] )^2 )^(1/2) # real distances from end of pool upstream
+
+                # check min and max step length
+                if(step.length < sl_min){
+                  if(verbose) notice("minimum step length is not reached!")
+                  error("program aborted")
+                  pointcloud = FALSE
+                }
+
+                if(step.length > sl_max){
+                  if(verbose) notice("maximum step length reached!")
+                  if(verbose) notice("No step detected. Discard and go to next...")
+                  ix.add = first_higher_point - 1;
+                  pointcloud = FALSE
+                  break;
+                }
+
+
+                # gradient index
+                gr.ix = gr.ix + 1
+
+                # 3 dimensional fit
+                fit.3d = TRUE
+                if(fit.3d){
+
+                  m = 0
+                  r.squared = 0
+
+                  if(length(slx) < 2){
+
+                    notice("point cloud only contains 1 point!")
+                    error("program aborted!")
+
+                  } else if(length(slx) == 2){
+
+                    if(verbose) notice("point cloud contains two points.");
+                    if(verbose) notice("set r2 to 0.5")
+
+                    r.squared = 0.5;
+                    m = (slz[2]-slz[1]) / (( (slx[2]-slx[1])^2 + (sly[2]-sly[1]) ^2) ^(1/2))
+
+                  } else {
+
+                    if(verbose) notice(paste("point cloud size:", length(slx)))
+                    if(verbose) notice(paste("step length [m]:",  round(step.length,1)))
+
+                    ### PCA for bottom line ########################
+                    xyz  <- data.frame(x = slx, y = sly, z = slz)
+                    xyz0 <- data.frame(x = slx, y = sly, z = slz0)
+                    N    <- nrow(xyz)
+
+                    mean_xyz   <- apply(xyz, 2, mean)
+                    mean_xyz0  <- apply(xyz0, 2, mean)
+
+                    xyz_pca    <- princomp(xyz)
+                    xyz_pca0   <- princomp(xyz0)
+
+                    dirVector  <- xyz_pca$loadings[, 1]    # PC1
+                    dirVector0 <- xyz_pca0$loadings[, 1]   # PC1
+
+                    xyz_fit    <- matrix(rep(mean_xyz, each = N), ncol=3) + xyz_pca$score[, 1] %*% t(dirVector)
+                    xyz_fit0   <- matrix(rep(mean_xyz0, each = N), ncol=3) + xyz_pca0$score[, 1] %*% t(dirVector0)
+
+                    t_ends     <- c(min(xyz_pca$score[,1]) - 0.2, max(xyz_pca$score[,1]) + 0.2)  # for both ends of line
+                    t_ends0    <- c(min(xyz_pca0$score[,1]) - 0.2, max(xyz_pca0$score[,1]) + 0.2)  # for both ends of line
+                    endpts     <- rbind(mean_xyz0 + t_ends0[1]*dirVector0, mean_xyz0 + t_ends0[2]*dirVector0)
+
+                    ### interactive plot ############################ #requires library(rgl)
+                    if(verbose){
+                      clear3d()
+                      #Sys.sleep(2)
+                      plot3d(xyz, type="p", size=10)
+                      #rgl.bbox(xlen = 0, ylen = 0, zlen = 0, color = c('grey100'))
+
+                      #Wait()
+                      # plot fits
+                      abclines3d(mean_xyz,  a = dirVector, col="orange", lwd=2)
+
+                      abclines3d(mean_xyz0, a = dirVector0, col="blue", lwd=2)     # mean + t * direction_vector
+
+                      # plot connections
+                      for(i in 1:N) segments3d(rbind(xyz[i,], xyz_fit[i,]),  lty=2,col="green2")
+                      for(i in 1:N) segments3d(rbind(xyz[i,], xyz_fit0[i,]), col="gray")
+
+                      # plot secondary coordinate system
+                      for(i in 1:N) points3d(rbind(c(xyz_fit0[i,c(1,2)], slz[i])),  size=8, col="red")
+                      for(i in 1:N) points3d(rbind(xyz_fit0[i,]),                   size=4, col="red")
+                    }
+
+                    origin = xyz_fit0[1,]
+
+                    # fit lm() in 2d sub-space
+                    x2d = ( (xyz_fit0[,1] - origin[1])^2 + (xyz_fit0[,2] - origin[2])^2 ) ^ (1/2)
+                    y2d = slz
+                    final_fit = lm(y2d ~ x2d)
+
+                    # plot this final fit in 2d space
+                    if(verbose) plot(y2d ~ x2d)
+                    if(verbose) abline(final_fit, col="red")
+
+                    # extract fit parameters
+                    n = final_fit$coefficients[1]
+                    m = final_fit$coefficients[2]
+                    r.squared = summary(final_fit)$r.squared
+
+                    ### plot this final fit in 3d space
+                    dirVectorFit = c(dirVector0[c(1,2)], m)
+                    intercept = c(xyz_fit[1,c(1,2)], n)
+                    if(verbose) abclines3d(intercept, a = dirVectorFit, col="red")
+
+                    #stop()
+
+                  } # if(length(slx) < 2) {} else if(length(slx) == 2) {} else
+
+                  #if(gr.ix==2) stop("end")
+
+                  # eval slope
+                  ssl = atan( m ) / (2*pi) * 360
+                  if(verbose) notice(paste("step slope [deg]", round(ssl,2)))
+
+                  ### check 4: min step slope
+                  if(ssl >= ssl_min){
+                    group = rbind(group, data.frame(
+                        "ix"  = gr.ix,
+                        "n"   = length(slx),
+                        "ssl" = ssl,
+                        "r2"  = r.squared,
+                        "sl"  = step.length,
+                        "px"  = slx[length(slx)],
+                        "py"  = sly[length(sly)],
+                        "pz"  = slz[length(slz)],
+                        "dummy" = TRUE
+                      ))
+                    checks[4] = TRUE
+                  } else {
+                    if(verbose) notice("ssl_min not reached!");
+                  }
+
+                } else {} # 2 dimensional fit to come
+
+                #Wait();
+
+              } # while(pointcloud)
+
+
+
+
+
+
+
+              ### step identified ###################################################################
+
+              if(all(checks)){
+
+                ### find start of step
+
+                stepgroup = group
+                group = stepgroup
+                bestfit = which.max(stepgroup$r2)
+
+                start.of.step = first_top_point - 1 + group$ix[bestfit]
+                step.slope    = group$ssl[bestfit]
+                step.i        = step.i + 1
+
+                cat(paste("#",step.i, " ", sep=""))
+                if(step.i %% 20 == 0) cat("\n")
+
+                ### store step data
+                steps = rbind(steps, data.frame(
+                    "id"              = step.i,
+                    "ix"              = ix,
+
+                    "pool.end.x"      = lpx,
+                    "pool.end.y"      = lpy,
+                    "pool.end.z"      = lpz,
+                    "pool.end.d"      = lp$cum_dist_2d[ix],
+
+                    "pool.start.x"    = lp_sp[1],
+                    "pool.start.y"    = lp_sp[2],
+                    "pool.start.z"    = lp_sp[3],
+                    "pool.start.d"    = lp$cum_dist_2d[ix] + lpd_sp,
+
+                    "pool.length"     = pool.length,
+                    "pool.dist"       = lpd_sp,
+
+                    "pool.depth.x"    = lp$x[ix + pool.depth.ix],
+                    "pool.depth.y"    = lp$y[ix + pool.depth.ix],
+                    "pool.depth.z"    = pool.depth.z,
+                    "pool.depth.r"    = pool.depth.r,
+                    "pool.depth.ix"   = ix + pool.depth.ix,
+                    "pool.depth.d"    = lp$cum_dist_2d[ix + pool.depth.ix],
+
+                    "step.height"     = lpzi[start.of.step] - pool.depth.z,
+
+                    "start.of.step.x" = lpxi[start.of.step],
+                    "start.of.step.y" = lpyi[start.of.step],
+                    "start.of.step.z" = lpzi[start.of.step],
+                    "start.of.step.d" = lpdi[start.of.step],
+
+                    "top.first.x"     = lpxi[first_top_point],
+                    "top.first.y"     = lpyi[first_top_point],
+                    "top.first.z"     = lpzi[first_top_point],
+                    "top.first.d"     = lpdi[first_top_point],
+
+                    "tx.id"           = as.character(step.i),
+                    "tx.rd"           = as.character(round(pool.depth.r, digits=2)),
+                    "tx.pl"           = as.character(round(pool.length, digits=2)),
+
+                    "dh_min"          = lpz + dh_min,
+
+                    "dummy" = TRUE
+                  ))
+
+                ix = ix + first_higher_point
+
+              } else {
+
+                # proceed with next ix
+                ix = ix + 1 + ix.add
+
+              }
+
+            } # while(ix < ixs[2])
+
+            # store
+            data[[set]]$steps = steps
+
+          } else { # if(!is.null(data[[set]]$features$lp)
+
+            warning("feature list does not contain long profile information to identify steps!")
+
+          }
+
+        } # if(par$steps.identify) # # #
 
       } else { # if(is.null(data[[set]]$metrics) || par$force.calc.metrics)
 
@@ -221,10 +668,12 @@ CM.processCenterline <- function(object, set=NULL){
 
   } # for(set in names(data))
 
+  notice("CM.processCenterline() has ended successfully!", TRUE)
+
   # return
   return(list(
-    data = data,
-    par  = par
-  ))
+      data = data,
+      par  = par
+    ))
 
 }

@@ -113,6 +113,18 @@ CM.calculateCenterline <- function(object, set=NULL){
         warn("there is a mismatch between the current parameter par$bank.reduce.min.dist and the dense polygon: re-run CM.generatePolygon()."); return(list( data = data,   par  = par));
       }
 
+      ### find start/end of centerline (interpolated bank points)
+      cl.start = list(
+        x = (head(data[[set]]$channel$x[data[[set]]$ix.l], n=1) + head(data[[set]]$channel$x[data[[set]]$ix.r], n=1)) / 2,
+        y = (head(data[[set]]$channel$y[data[[set]]$ix.l], n=1) + head(data[[set]]$channel$y[data[[set]]$ix.r], n=1)) / 2
+      )
+      cl.end = list(
+        x = (tail(data[[set]]$channel$x[data[[set]]$ix.l], n=1) + tail(data[[set]]$channel$x[data[[set]]$ix.r], n=1)) / 2,
+        y = (tail(data[[set]]$channel$y[data[[set]]$ix.l], n=1) + tail(data[[set]]$channel$y[data[[set]]$ix.r], n=1)) / 2
+      )
+
+
+
       # create Voronoi/Dirichlet/Thiessen polygons
       notice("step 1 of 5: get voronoi polygons...", TRUE)
       if(is.null(data[[set]]$cl$paths) || par$force.calc.voronoi
@@ -175,23 +187,23 @@ CM.calculateCenterline <- function(object, set=NULL){
         colnames(points.in.polygon) = c("x", "y")
 
 
-        ### find start/end segments
+        ### find start/end segments from filter #1
         cl.start.i = which.min((
-          ((((data[[set]]$channel$x[data[[set]]$ix.l][1]                        + data[[set]]$channel$x[data[[set]]$ix.r][1])                        / 2) - points.in.polygon[,"x"])^2) +
-          ((((data[[set]]$channel$y[data[[set]]$ix.l][1]                        + data[[set]]$channel$y[data[[set]]$ix.r][1])                        / 2) - points.in.polygon[,"y"])^2)
+          (( cl.start$x - points.in.polygon[,"x"])^2) +
+          (( cl.start$y - points.in.polygon[,"y"])^2)
         ) ^(1/2))
         cl.end.i = which.min((
-          ((((data[[set]]$channel$x[data[[set]]$ix.l][length(data[[set]]$ix.l)] + data[[set]]$channel$x[data[[set]]$ix.r][length(data[[set]]$ix.r)]) / 2) - points.in.polygon[,"x"])^2) +
-          ((((data[[set]]$channel$y[data[[set]]$ix.l][length(data[[set]]$ix.l)] + data[[set]]$channel$y[data[[set]]$ix.r][length(data[[set]]$ix.r)]) / 2) - points.in.polygon[,"y"])^2)
+          (( cl.end$x   - points.in.polygon[,"x"])^2) +
+          (( cl.end$y   - points.in.polygon[,"y"])^2)
         ) ^(1/2))
 
 
-        # all paths in polygon
+        # save all paths in polygon
         data[[set]]$cl$paths.in.polygon = paths.in.polygon;
 
-        # start and end point
-        data[[set]]$cl$ends.x   = points.in.polygon[c(cl.start.i, cl.end.i),"x"]
-        data[[set]]$cl$ends.y   = points.in.polygon[c(cl.start.i, cl.end.i),"y"]
+        # save coordinates of centerline ends (start and end points of centerline)
+        data[[set]]$cl$ends.x   = points.in.polygon[c(cl.start.i, cl.end.i), "x"]
+        data[[set]]$cl$ends.y   = points.in.polygon[c(cl.start.i, cl.end.i), "y"]
 
       } else {
 
@@ -207,7 +219,7 @@ CM.calculateCenterline <- function(object, set=NULL){
       if(is.null(data[[set]]$cl$cl.paths)){
 
         # notice
-        notice(paste("start iterations with", par$bank.filter3.max.it, "iterations maximum"))
+        notice(paste("start iterations with", par$bank.filter2.max.it, "iterations maximum"))
 
         cl.paths            = paths.in.polygon
         remove.continue     = TRUE
@@ -217,7 +229,7 @@ CM.calculateCenterline <- function(object, set=NULL){
 
           # display interation and check for max
           remove.iteration = remove.iteration + 1
-          if(remove.iteration > par$bank.filter3.max.it){ warn(paste("\n### exit due to maximum iterations (max. iterations = ", par$bank.filter3.max.it, ") ###", "\nNote: this may be caused by gaps that opened in the centerline due to\njagged centerline paths. First, check for gaps visually with CM.plotPlanView(cmgo.obj, set=\"set1\", error=1). \nYou can than either repair these gaps by editing the centerline paths manually or \nsimply increase the bank resolution via parameter par$bank.interpolation.max.dist!", sep=""));
+          if(remove.iteration > par$bank.filter2.max.it){ warn(paste("\n### exit due to maximum iterations (max. iterations = ", par$bank.filter2.max.it, ") ###", "\nNote: this may be caused by gaps that opened in the centerline due to\njagged centerline paths. First, check for gaps visually with CM.plotPlanView(cmgo.obj, set=\"",set,"\", error=1). \nYou can than either repair these gaps by editing the centerline paths manually or \nsimply increase the bank resolution via parameter par$bank.interpolation.max.dist!", sep=""));
             data[[set]]$cl$errors.filter2       = paths.in.polygon[remove.ixs,          c("x1", "y1")];
             data[[set]]$cl$errors.filter2.first = paths.in.polygon[remove.ixs.first.it, c("x1", "y1")];
             data[[set]]$cl$cl.paths             = cl.paths
@@ -277,6 +289,8 @@ CM.calculateCenterline <- function(object, set=NULL){
         perc = nrow(cl.paths)
         perc.lev = 0
         if(perc > 1000) notice("0%")
+
+
         while(sort.continue){
 
           this = as.numeric(tail(cl, n=1))
@@ -290,6 +304,7 @@ CM.calculateCenterline <- function(object, set=NULL){
             any(identical(this, as.numeric(row[c(1,2)])), identical(this, as.numeric(row[c(3,4)])))
           }))
 
+
           if(length(match) != 1){
 
             if(all(this == c(data[[set]]$cl$ends.x[2], data[[set]]$cl$ends.y[2]))){
@@ -302,7 +317,7 @@ CM.calculateCenterline <- function(object, set=NULL){
             } else {
 
               warn(paste("number of connections should be 1 but is", length(match)))
-              warn("call CM.plotPlanView(cmgo.obj, set=\"set1\", error=1, error.type=\"errors.sort\") to resolve")
+              warn("call CM.plotPlanView(cmgo.obj, set=\"",set,"\", error=1, error.type=\"errors.sort\") to resolve")
 
               data[[set]]$cl$errors.sort = matrix(this, ncol=2)
 
@@ -315,14 +330,21 @@ CM.calculateCenterline <- function(object, set=NULL){
 
           }
 
+          if(all(this == cl.paths[match,1:2])) pos = c(3,4)
+          if(all(this == cl.paths[match,3:4])) pos = c(1,2)
+
           # store point
-          point = cl.paths[match, this!=cl.paths[match,]]
+          #point = cl.paths[match, this!=cl.paths[match,]]
+          point = cl.paths[match, pos]
           cl    = rbind(cl, data.frame(x = point[[1]], y = point[[2]]))
 
           # remove from paths
           cl.paths = cl.paths[-match, ]
 
         } # while(sort.continue)
+
+        # add start/end point from banks
+        cl = rbind(cl.start, cl, cl.end)
 
         # store
         data[[set]]$cl$original = cl
@@ -336,48 +358,49 @@ CM.calculateCenterline <- function(object, set=NULL){
 
       cl = list(original = cl)
 
+      ###########################################################
+
+
+
+      ### smooth centerline #####################################
+
       notice("step 5 of 5: smooth...", TRUE)
 
       if(par$centerline.smoothing.width %% 2 != 1){ par$centerline.smoothing.width = par$centerline.smoothing.width + 1; notice("par$centerline.smoothing.width must be odd thus has been increased by 1")}
       notice(paste("smoothing width:", par$centerline.smoothing.width))
       cl$smoothed = as.data.frame(rollapply(as.data.frame(cl$original), par$centerline.smoothing.width, mean, partial=TRUE))
 
-      notice("measure centerline...", TRUE)
+      # add start/end point (has been moved by smoothing)
+      cl$smoothed[1,]                     = cl.start
+      cl$smoothed[length(cl$smoothed$x),] = cl.end
+
+      ###########################################################
+
+
 
       ### calculate length and cumulative length ################
 
-      cl.temp = data.frame(
-        x  = c(cl$original$x[1], cl$original$x),
-        y  = c(cl$original$y[1], cl$original$y),
-        px = c(cl$original$x, NA),
-        py = c(cl$original$y, NA)
-      )
+      notice("measure length of centerline...", TRUE)
 
-      cl$original$segments = apply(as.data.frame(cl.temp), 1, function(x) return ( ( ( ( x["px"] - x["x"] ) ^2) + (( x["py"] - x["py"] )^2 ) ) ^(1/2) ) )[1:length(cl$original$x)]
-      cl$original$length   = cumsum(cl$original$segments)
+      # calculate 2d length of original centerline
+      diffs = diff(as.matrix(cl$original))
+      cl$original$seg_dist_2d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2))
+      cl$original$cum_dist_2d = cumsum(cl$original$seg_dist_2d)
 
-      # for smoothed cl #########################################
-
-      cl.temp = data.frame(
-        x  = c(cl$smoothed$x[1], cl$smoothed$x),
-        y  = c(cl$smoothed$y[1], cl$smoothed$y),
-        px = c(cl$smoothed$x, NA),
-        py = c(cl$smoothed$y, NA)
-      )
-
-      cl$smoothed$segments = apply(as.data.frame(cl.temp), 1, function(x) return (  ( ( ( x["px"] - x["x"] ) ^2) + (( x["py"] - x["py"] )^2 ) ) ^(1/2) ) )[1:length(cl$original$x)]
-      cl$smoothed$length   = cumsum(cl$smoothed$segments)
-
-      notice("length calculated!", TRUE)
-
+      # calculate 2d length of smoothed centerline
+      diffs = diff(as.matrix(cl$smoothed))
+      cl$smoothed$seg_dist_2d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2))
+      cl$smoothed$cum_dist_2d = cumsum(cl$smoothed$seg_dist_2d)
 
       ###########################################################
+
+
+
+      ### project elevation #####################################
 
       if(!is.null(data[[set]]$channel$z)){
 
         notice("elevation information found: project elevation to centerline", TRUE)
-
-        ### project elevation #####################################
 
         lp_closest = apply(cbind(cl$original$x, cl$original$y), 1, function(x){
           return (which.min((  ((data[[set]]$channel$x - x[1])^2) + ((data[[set]]$channel$y - x[2])^2) ) ^(1/2) ) )
@@ -392,62 +415,29 @@ CM.calculateCenterline <- function(object, set=NULL){
         cl$smoothed$z = data[[set]]$channel$z[lp_closest]
 
         ### calculate slope #######################################
+        cl$smoothed$slope = apply(cl$smoothed, 1, function(x){
 
-        slope_range = 15 # upslope distance in meters
-        cl_slope = apply(cl$smoothed, 1, function(x){
-
-          ind = which(cl$smoothed$length >= x[["length"]] & cl$smoothed$length < (x[["length"]] + slope_range))
-          fit = lm(cl$smoothed$z[ind] ~ cl$smoothed$length[ind])
+          ind = which(cl$smoothed$cum_dist_2d >= x[["cum_dist_2d"]] & cl$smoothed$cum_dist_2d < (x[["cum_dist_2d"]] + par$centerline.local.slope.range))
+          fit = lm(cl$smoothed$z[ind] ~ cl$smoothed$cum_dist_2d[ind])
           return(fit$coefficients[[2]])
 
         })
 
-        cl$smoothed$slope = cl_slope
+        ### calculate 3d length of smoothed centerline ############
+        diffs = diff(as.matrix(cl$smoothed))
+        cl$smoothed$seg_dist_3d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2 + diffs[,"z"]^2))
+        cl$smoothed$cum_dist_3d = cumsum(cl$smoothed$seg_dist_3d)
 
       } else { notice("no elevation information provided in input data: skip elevation projection") }
 
-
-
-      ### project features onto centerline
-      if(typeof(data[[set]]$features) == "list"){
-
-        notice("feature list found: project features to centerline", TRUE)
-        cl$smoothed$projections = list()
-
-        nrp = length(cl$smoothed$x)
-
-        centerline_line = psp(
-          cl$smoothed$x[1:(nrp-1)],
-          cl$smoothed$y[1:(nrp-1)],
-          cl$smoothed$x[2:(nrp)],
-          cl$smoothed$y[2:(nrp)],
-          window=owin(range(cl$smoothed$x), range(cl$smoothed$y))
-        )
-
-        for(feature in names(data[[set]]$features)){
-
-          if(!is.null(data[[set]]$features[[feature]]$x) && !is.null(data[[set]]$features[[feature]]$y)){
-
-            feature_points = ppp(data[[set]]$features[[feature]]$x, data[[set]]$features[[feature]]$y,
-              window=owin(range(data[[set]]$features[[feature]]$x), range(data[[set]]$features[[feature]]$y))
-            )
-
-            cl$smoothed$projections[[feature]] = nncross(feature_points, centerline_line)
-
-            notice(paste("feature", feature, "projected to centerline"))
-
-          } else { warning("feature does not contain proper x,y coordinates list!") }
-
-        }
-
-      }
+      #############################################################
 
       notice(paste("centerline for", set, "calculated!"), TRUE)
 
       # store
       data[[set]]$cl$original = cl$original
       data[[set]]$cl$smoothed = cl$smoothed
-      data[[set]]$cl$length.factor = cl$smoothed$length[length(cl$smoothed$length)] / cl$original$length[length(cl$original$length)]
+      data[[set]]$cl$length.factor = tail(cl$smoothed$cum_dist_2d, n=1) / tail(cl$original$cum_dist_2d, n=1)
 
     } else {
 
@@ -457,7 +447,7 @@ CM.calculateCenterline <- function(object, set=NULL){
 
   } # for(set in names(data))
 
-  notice("centerline(s) returned sucessfully!", TRUE)
+  notice("CM.calculateCenterline() has ended successfully!", TRUE)
 
   # return
   return(list(

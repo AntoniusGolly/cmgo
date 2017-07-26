@@ -34,7 +34,7 @@ You'll able to see the R documentation of cmgo (type `?cmgo` in the R console) o
 
 ```R
 # installation of dependencies (required only once)
-install.packages(c("spatstat", "zoo", "sp", "stringr"))
+install.packages(c("spatstat", "zoo", "sp", "stringr", "rgl", "shapefiles"))
 
 # installation (required only once)
 install.packages("cmgo", repos="https://raw.githubusercontent.com/AntoniusGolly/repos/master", type="source")
@@ -54,13 +54,15 @@ Alternatively, you can source the scipts manually. This has the benefit, that yo
 path_to_cmgo = "C:/cmgo" # path to cmgo directories "./R" and "./data"
 
 # installation of dependencies (required only once)
-install.packages(c("spatstat", "zoo", "sp", "stringr"))
+install.packages(c("spatstat", "zoo", "sp", "stringr", "rgl", "shapefiles"))
 
 # load libraries
 library(zoo)
 library(spatstat)
 library(stringr)
 library(sp)
+library(rgl)
+library(shapefiles)
 
 # source functions and load data
 for(function.file in list.files(paste(path_to_cmgo, "/R",    sep="")) source(paste(path_to_cmgo, "/R/",    function.file, sep=""))

@@ -4,14 +4,16 @@
 \alias{CM.plotPlanView}
 \title{Plot a map of the channel}
 \usage{
-CM.plotPlanView(object, set = "set1", set.compare = NULL, extent = NULL,
-  zoom = TRUE, zoom.length = NULL, cl = NULL, error = NULL,
-  error.type = "errors.filter2", x = NULL, y = NULL)
+CM.plotPlanView(object, set = "set1", title = NULL, set.compare = NULL,
+  extent = NULL, zoom = FALSE, zoom.length = NULL, cl = NULL,
+  error = NULL, error.type = "errors.filter2", x = NULL, y = NULL)
 }
 \arguments{
 \item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 
 \item{set}{the data set to be plotted, "set1" if not specified. See documentation of CM.ini() to learn about data sets.}
+
+\item{title}{a title printed above the plot, if not specified a title will be composed from the enabled plot elements}
 
 \item{set.compare}{a second data set to be plotted in light color for comparison}
 
@@ -32,7 +34,7 @@ CM.plotPlanView(object, set = "set1", set.compare = NULL, extent = NULL,
 \item{y}{an y-coordinate where the map is centered at}
 }
 \value{
-a list of applied plot parameters (this is useful for plotting the same extent in CM.plotBankShift())
+a list of applied plot parameters (this is useful for plotting the same extent in CM.plotMetrics())
 }
 \description{
 Create a plan view map of the channel and various elements that can be switched on and off (banks, centerline, transects,
@@ -50,7 +52,7 @@ You can enable/disable the following plotting elements via the paramtere object:
 plot.planview               = TRUE,        # plot an plan view overview plot
 plot.planview.secondary     = TRUE,        # plot a secondary channel polygon to the plot (for comparison of data sets)
 plot.planview.bank.points   = TRUE,        # plot channel bank points
-plot.planview.polygons      = TRUE,        # plot channel bank polygons
+plot.planview.polygon       = TRUE,        # plot channel bank polygon
 plot.planview.voronoi       = TRUE,        # plot voronoi polygons in plan view plot
 plot.planview.cl.original   = FALSE,       # plot centerline in plan view plot
 plot.planview.cl.smoothed   = TRUE,        # plot centerline in plan view plot

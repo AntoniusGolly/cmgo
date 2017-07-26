@@ -5,7 +5,7 @@
 #' cmgo.obj = CM.calculateCenterline(cmgo.obj)   # get centerline (calculate or load)
 #' cmgo.obj = CM.processCenterline(cmgo.obj)     # process centerline (calculate width)
 #' CM.plotPlanView(cmgo.obj)          # plot results
-#' CM.plotplotBankShift(cmgo.obj)     # plot channel width and bank retreat
+#' CM.plotMetrics(cmgo.obj)           # plot channel width and bank retreat
 #' CM.writeData(cmgo.obj)             # data to workspace and export data to csv-files (see par)#'
 #'}
 #'

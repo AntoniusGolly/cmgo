@@ -113,7 +113,7 @@ structure with \code{str(cmgo.obj$data[[set]]$metrics)}). Thus you can use this 
 plotting functions CM.plotPlanView() and CM.plotWidth(). Note, that demo data set demo3 uses the standard
 mode for the calculation of the metrics (default)
 and not the reference centerline mode. To see the reference centerline mode in action use data set \strong{demo3}. In addition
-to the previously mentioned plotting functions, here also CM.plotBankShift() is available.
+to the previously mentioned plotting functions, here also CM.plotMetrics() is available.
 }
 
 \examples{

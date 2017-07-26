@@ -16,13 +16,13 @@ This file function does not return any value.
 Write output files with channel metrics and the current workspace.
 }
 \details{
-\code{CM.writeData()} allows you to write the results to output files and to an R workspace file. 
-The outputs written depend on the settings in the parameter object. If \code{cmgo.obj$par$workspace.write = TRUE} 
-(default is FALSE) a workspace file is written containing the global data object. The 
-filename is defined in \code{cmgo.obj$par$workspace.filename}. Further, ASCII tables can be written 
-containing the centerline geometry and the calculated metrics. If \code{cmgo.obj$par$output.write = TRUE} 
-(default is FALSE) an output file for each data set is written to the output folder specified 
-in \code{cmgo.obj$par$output.dir}. The file names are the same as the input filenames with the 
+\code{CM.writeData()} allows you to write the results to output files and to an R workspace file.
+The outputs written depend on the settings in the parameter object. If \code{cmgo.obj$par$workspace.write = TRUE}
+(default is FALSE) a workspace file is written containing the global data object. The
+filename is defined in \code{cmgo.obj$par$workspace.filename}. Further, ASCII tables can be written
+containing the centerline geometry and the calculated metrics. If \code{cmgo.obj$par$output.write = TRUE}
+(default is FALSE) an output file for each data set is written to the output folder specified
+in \code{cmgo.obj$par$output.dir}. The file names are the same as the input filenames with the
 prefixes cl_* and metrics_*. All parameters regarding the output generation are listed in \code{\link[=CM.par]{CM.par()}}.
 }
 \examples{
