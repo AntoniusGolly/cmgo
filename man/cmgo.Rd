@@ -83,10 +83,9 @@ The initialization covers the loading of the parameters in \code{\link[=CM.par]{
 the data in \code{\link[=CM.ini]{CM.ini()}}. See their documentation for details. The work flow of
 the data processing is shown in the plan view plots below.
 
- \if{html}{\figure{01_processing.png}{options: width="800px" alt="Figure: processing"}}
- \if{latex}{\figure{01_processing.pdf}{options: width=12cm}}
-
-\emph{Figure 1: A visualization of the work flow of the package, a) data input, b) polygon generation,
+ \if{html}{\figure{01-processing.png}{options: width="800px" alt="Figure: processing"}}
+ \if{latex}{\figure{01-processing.pdf}{options: width=9cm}}
+ \emph{Figure 1: A visualization of the work flow of the package, a) data input, b) polygon generation,
 c-e) centerline generation, f) transect generation, g) channel width calculation.}
 
 Channel bank points (Fig. 1a) represent the required input data for the package. The algorithm
@@ -167,8 +166,8 @@ Now, all metrics for the different bank surveys will be calculated based on the 
 of the data set "set1". Use this option only if your bank surveys differ only slightly. Otherwise, the
 calculated channel metrics might not be representative (see Fig. 10).
 
-\figure{10_documentation.png}{options: width="800px" alt="Figure: reference centerline"}
-
+\if{html}{\figure{10-documentation.png}{options: width="800px" alt="Figure: reference centerline"}}
+\if{latex}{\figure{10-documentation.png}{options: width=6cm}}
 \emph{Figure 10: For channel geometries that differ drastically, the usage of a reference centerline
 is not advised. The centerline of a data set (blue line) is not useful for calculating the metrics
 of the dashed channel geometry.}
@@ -188,8 +187,8 @@ if the generation of the centerline fails and will offer you ways to elaborate t
 failure occurs if the resolution of channel bank points (controlled via \code{$bank.interpolate.max.dist})
 is relatively low compared to the channel width. The following image illustrates the problem:
 
-\figure{02_gap.png}{options: width="500px" alt="Figure: gap"}
-
+\if{html}{\figure{02-gap.png}{options: width="500px" alt="Figure: Gap in Centerline"}}
+\if{latex}{\figure{02-gap.png}{options: width=6cm}}
 \emph{Figure 2: A gap in the centerline occurs since the spacing of the bank points was too high.}
 
 Apparently, the centerline segments are too scraggy and do not lie entirely within the bank polygons. Since
@@ -198,7 +197,8 @@ in the centerline. The program will not be able to fill this gap automatically. 
 with the calculation of the centerline consider to increase the spatial resolution of bank points. The following
 example illustrates how this fixes the problem.
 
-\figure{03_sep_spacing.png}{options: width="500px" alt="Figure: fix"}
+\if{html}{\figure{03-sep-spacing.png}{options: width="500px" alt="Figure: fix"}}
+\if{latex}{\figure{03-sep-spacing.png}{options: width=6cm}}
 \emph{Figure 3: The same location of the channel with two different bank point spacings.}
 
 Another problem can arise from an unsuitable settings of the span for the calculation of the
@@ -207,7 +207,8 @@ of a group of \code{n} points of the centerline. This \code{n} equals 3 by defau
 \code{$transects.span}). The following plan view plot illustrates to what misinterpretation of the channel width
 can lead:
 
-\figure{04_transect_span.png}{options: width="500px" alt="span_issues"}
+\if{html}{\figure{04-transect-span.png}{options: width="500px" alt="span_issues"}}
+\if{latex}{\figure{04-transect-span.png}{options: width=6cm}}
 \emph{Figure 4, left: the transects (perpendiculars to the centerline) do not intersect
 with banks properly, thus channel width is overrepresented. Right: an increased transect span fixes the problem
 and channel width is now identified correctly.}

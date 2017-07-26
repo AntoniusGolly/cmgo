@@ -9,9 +9,8 @@
 #' that group to which the perpendicular -- the transect -- is calculated (see Fig. 8b). In the final step the intersections of the
 #' transects with the banks are calculated (Fig. 8c).
 #'
-#' \if{html}{\figure{08_processing.png}{options: width="800px" alt="Figure: processing"}}
-#' \if{latex}{\figure{08_processing.pdf}{options: width=12cm}}
-#'
+#' \if{html}{\figure{08-processing.png}{options: width="800px" alt="Figure: processing"}}
+#' \if{latex}{\figure{08-processing.pdf}{options: width=9cm}}
 #' \emph{Figure 8: A visualization of the transect calculation. a) the channel centerline, b) for each
 #' group of \code{n} points (in the example n=3) a line is fitted through the outer points (black line).
 #' The perpendicular to this line is the transect. c) the vectors from each centerline point to the left

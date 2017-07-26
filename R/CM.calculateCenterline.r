@@ -11,9 +11,8 @@
 #'
 #' \code{CM.calculateCenterline()} calculates the centerline of the channel polygon (Fig. 7).
 #'
-#' \if{html}{\figure{06_processing.png}{options: width="800px" alt="Figure: processing"}}
-#' \if{latex}{\figure{06_processing.pdf}{options: width=12cm}}
-#'
+#' \if{html}{\figure{06-processing.png}{options: width="800px" alt="Figure: processing"}}
+#' \if{latex}{\figure{06-processing.pdf}{options: width=9cm}}
 #' \emph{Figure 6: A visualization of the calculation of the centerline a) the channel polygon, b) the Voronoi polygons,
 #' c) extraction of the centerline segments, d) smoothing of the centerline path.}
 #'
@@ -24,9 +23,8 @@
 #' are disassembled to single line segments. In Fig. 6b you can already notice a centerline evolving from the segments in
 #' the middle of the channel polygon. To get only these segments a filtering (Fig. 7) is applied to the Voronoi segments.
 #'
-#' \if{html}{\figure{07_filtering.png}{options: width="600px" alt="Figure: processing"}}
-#' \if{latex}{\figure{07_filtering.pdf}{options: width=6cm}}
-#'
+#' \if{html}{\figure{07-filtering.png}{options: width="600px" alt="Figure: processing"}}
+#' \if{latex}{\figure{07-filtering.pdf}{options: width=6cm}}
 #' \emph{Figure 7: the filtering of the Voronoi segments: a) in blue all Voronoi segments, b) in red all segments fully within
 #' the channel polygon, c) in green all segments without dead ends.}
 #'

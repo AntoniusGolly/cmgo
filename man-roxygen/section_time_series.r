@@ -26,8 +26,8 @@
 #' of the data set "set1". Use this option only if your bank surveys differ only slightly. Otherwise, the
 #' calculated channel metrics might not be representative (see Fig. 10).
 #'
-#' \figure{10_documentation.png}{options: width="800px" alt="Figure: reference centerline"}
-#'
+#' \if{html}{\figure{10-documentation.png}{options: width="800px" alt="Figure: reference centerline"}}
+#' \if{latex}{\figure{10-documentation.png}{options: width=6cm}}
 #' \emph{Figure 10: For channel geometries that differ drastically, the usage of a reference centerline
 #' is not advised. The centerline of a data set (blue line) is not useful for calculating the metrics
 #' of the dashed channel geometry.}

@@ -81,7 +81,4 @@ If you have included the R library in your R environment (option 1. of the Insta
 # function documentation
 ?cmgo.run # e.g. for the docu of cmgo.run()
 ```
-
-We are currently preparing a pdf documentation for users who have sourced the scripts manually.
-
-
+The documentation is also [available as a *.pdf manual](https://raw.githubusercontent.com/AntoniusGolly/repos/master/manuals/cmgo_0.1.4.pdf).

@@ -11,8 +11,8 @@
 #' failure occurs if the resolution of channel bank points (controlled via \code{$bank.interpolate.max.dist})
 #' is relatively low compared to the channel width. The following image illustrates the problem:
 #'
-#' \figure{02_gap.png}{options: width="500px" alt="Figure: gap"}
-#'
+#' \if{html}{\figure{02-gap.png}{options: width="500px" alt="Figure: Gap in Centerline"}}
+#' \if{latex}{\figure{02-gap.png}{options: width=6cm}}
 #' \emph{Figure 2: A gap in the centerline occurs since the spacing of the bank points was too high.}
 #'
 #' Apparently, the centerline segments are too scraggy and do not lie entirely within the bank polygons. Since
@@ -21,7 +21,8 @@
 #' with the calculation of the centerline consider to increase the spatial resolution of bank points. The following
 #' example illustrates how this fixes the problem.
 #'
-#' \figure{03_sep_spacing.png}{options: width="500px" alt="Figure: fix"}
+#' \if{html}{\figure{03-sep-spacing.png}{options: width="500px" alt="Figure: fix"}}
+#' \if{latex}{\figure{03-sep-spacing.png}{options: width=6cm}}
 #' \emph{Figure 3: The same location of the channel with two different bank point spacings.}
 #'
 #' Another problem can arise from an unsuitable settings of the span for the calculation of the
@@ -30,7 +31,8 @@
 #' \code{$transects.span}). The following plan view plot illustrates to what misinterpretation of the channel width
 #' can lead:
 #'
-#' \figure{04_transect_span.png}{options: width="500px" alt="span_issues"}
+#' \if{html}{\figure{04-transect-span.png}{options: width="500px" alt="span_issues"}}
+#' \if{latex}{\figure{04-transect-span.png}{options: width=6cm}}
 #' \emph{Figure 4, left: the transects (perpendiculars to the centerline) do not intersect
 #' with banks properly, thus channel width is overrepresented. Right: an increased transect span fixes the problem
 #' and channel width is now identified correctly.}

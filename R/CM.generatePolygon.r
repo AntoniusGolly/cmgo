@@ -15,7 +15,6 @@
 #'
 #' \if{html}{\figure{plotCheckPolygon.png}{options: width="600px" alt="Figure: check polygon"}}
 #' \if{latex}{\figure{plotCheckPolygon.pdf}{options: width=8cm}}
-#'
 #' \emph{Figure 5: The plot shows the polygon check plot for two data sets (two rows). The columns are: overview of the full channel (left),
 #' start of the polygon (middle) and end of the polygon (right). For the first data set everything looks fine. The
 #' polygon is circular and the ends look consistent (note, the starting end (middle) is open). The second data

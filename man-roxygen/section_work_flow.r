@@ -7,10 +7,9 @@
 #' the data in \code{\link[=CM.ini]{CM.ini()}}. See their documentation for details. The work flow of
 #' the data processing is shown in the plan view plots below.
 #'
-#'  \if{html}{\figure{01_processing.png}{options: width="800px" alt="Figure: processing"}}
-#'  \if{latex}{\figure{01_processing.pdf}{options: width=12cm}}
-#'
-#' \emph{Figure 1: A visualization of the work flow of the package, a) data input, b) polygon generation,
+#'  \if{html}{\figure{01-processing.png}{options: width="800px" alt="Figure: processing"}}
+#'  \if{latex}{\figure{01-processing.pdf}{options: width=9cm}}
+#'  \emph{Figure 1: A visualization of the work flow of the package, a) data input, b) polygon generation,
 #' c-e) centerline generation, f) transect generation, g) channel width calculation.}
 #'
 #' Channel bank points (Fig. 1a) represent the required input data for the package. The algorithm
