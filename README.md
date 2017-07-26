@@ -1,7 +1,7 @@
 # cmgo
 Deriving principle **c**hannel **m**etrics from bank and long-profile geometry with the R-package cmgo.
 
-![Workflow](https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/01_processing.png)
+![Workflow](https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/01-processing.png)
 <sup>Figure 1: visualization of the work flow of the package, a) the channel bank points that represent the data input, b) a polygon is generated where bank points are linearly interpolated, c-e) the centerline is calculated via Voronoi polygons, f) transects are calculated, g) the channel width is derived from the transects.</sup>
 
 ## What is cmgo?
