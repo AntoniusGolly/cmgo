@@ -134,7 +134,7 @@ CM.plotWidth <- function(object, set="set1", set.compare=NULL, cl=NULL, d=NULL){
       main = paste("Channel width of", set, if(!is.null(set.compare)) paste("(solid) and", set.compare, " (dashed)") else ""),
       ylim = y.lim,
       xlim = c(data[[set]]$cl$smoothed$cum_dist_2d[cl[1]],data[[set]]$cl$smoothed$cum_dist_2d[cl[length(cl)]]),
-      xlab = paste("Distance downstream [", par$input.unit, "]", sep=""),
+      xlab = paste("Distance upstream [", par$input.unit, "]", sep=""),
       ylab = paste("Width [", par$input.unit, "]", sep=""),
       type = "n"
     )

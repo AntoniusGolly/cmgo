@@ -157,6 +157,7 @@ CM.par <- function(par.set=NULL){
     centerline.reference        = "set1",      # sets the reference data set if centerline.use.reference is [TRUE]
     calculate.metrics           = TRUE,        # if [TRUE] all centerline metrics are calculated (see CM.processCenterline())
     force.calc.metrics          = FALSE,       # if [TRUE] the metrics  are always re-calculated and never taken from cache
+    metrics.local.change.range  = 5,           # the upstream range over which metric changes are derived (e.g. width change)
 
     # step identification after Zimmermann et. al 2008 [Zimmermann, A.E., Church, M., and Hassan, M. a., 2008, Identification of steps and pools from stream longitudinal profile data: Geomorphology, v. 102, no. 3–4, p. 395–406, doi: 10.1016/j.geomorph.2008.04.009.)]
     steps.identify              = TRUE,

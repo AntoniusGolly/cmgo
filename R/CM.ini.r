@@ -142,6 +142,10 @@ CM.ini <- function(object = "demo", par = NULL){
       ix.l = which(data[[set]]$channel$bank == par$bank.code.left)
       ix.r = which(data[[set]]$channel$bank == par$bank.code.right)
 
+      # give regular names
+      data[[set]]$channel$bank[ix.l] = "left"
+      data[[set]]$channel$bank[ix.r] = "right"
+
       if(par$bank.reverse.left){
 
         data[[set]]$channel$x[ix.l] = rev(data[[set]]$channel$x[ix.l])
@@ -157,7 +161,6 @@ CM.ini <- function(object = "demo", par = NULL){
         data[[set]]$channel$z[ix.r] = rev(data[[set]]$channel$z[ix.r])
 
       }
-
 
       notice(paste("file '", file, "' assigned to ", set, sep=""))
 

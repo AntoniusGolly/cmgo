@@ -400,19 +400,19 @@ CM.calculateCenterline <- function(object, set=NULL){
 
         notice("elevation information found: project elevation to centerline", TRUE)
 
+        ## on original centerline
         lp_closest = apply(cbind(cl$original$x, cl$original$y), 1, function(x){
           return (which.min((  ((data[[set]]$channel$x - x[1])^2) + ((data[[set]]$channel$y - x[2])^2) ) ^(1/2) ) )
         })
-
         cl$original$z = data[[set]]$channel$z[lp_closest]
 
+        ## on smoothed centerline
         lp_closest = apply(cbind(cl$smoothed$x, cl$smoothed$y), 1, function(x){
           return (which.min((  ((data[[set]]$channel$x - x[1])^2) + ((data[[set]]$channel$y - x[2])^2) ) ^(1/2) ) )
         })
-
         cl$smoothed$z = data[[set]]$channel$z[lp_closest]
 
-        ### calculate slope #######################################
+        ### calculate slope #####################################
         cl$smoothed$slope = apply(cl$smoothed, 1, function(x){
 
           ind = which(cl$smoothed$cum_dist_2d >= x[["cum_dist_2d"]] & cl$smoothed$cum_dist_2d < (x[["cum_dist_2d"]] + par$centerline.local.slope.range))
@@ -421,14 +421,14 @@ CM.calculateCenterline <- function(object, set=NULL){
 
         })
 
-        ### calculate 3d length of smoothed centerline ############
+        ### calculate 3d length of smoothed centerline ##########
         diffs = diff(as.matrix(cl$smoothed))
         cl$smoothed$seg_dist_3d = c(0, sqrt(diffs[,"x"]^2 + diffs[,"y"]^2 + diffs[,"z"]^2))
         cl$smoothed$cum_dist_3d = cumsum(cl$smoothed$seg_dist_3d)
 
       } else { notice("no elevation information provided in input data: skip elevation projection") }
 
-      #############################################################
+      ###########################################################
 
       notice(paste("centerline for", set, "calculated!"), TRUE)
 

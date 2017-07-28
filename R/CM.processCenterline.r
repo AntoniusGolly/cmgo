@@ -147,6 +147,46 @@ CM.processCenterline <- function(object, set=NULL){
 
   }
 
+  CM.calculateWidthChange = function(cl_len, w, width_range){
+
+    width_change = list()
+
+    for(w_range in width_range){
+
+      # calculates the local change of the width for a given point
+      dw.fit = apply(as.array(cl_len), 1, function(x){
+
+        # select indices within the matching range
+        ixs = which(cl_len >= x & cl_len < (x + w_range))
+
+        # fit a line through values
+        w_fit = lm(w[ixs] ~ rev(cl_len[ixs]))
+
+        # return slope of fit
+        return (w_fit$coefficients[2])
+
+      })
+
+      # calculates the local change of the width for a given point
+      dw.avg = apply(as.array(cl_len), 1, function(x){
+
+        # select indices within the matching range
+        ixs = which(cl_len >= x & cl_len < (x + w_range))
+
+        # return slope of average
+        return ((w[head(ixs, n=1)] - w[tail(ixs, n=1)]) / (cl_len[head(ixs, n=1)] - cl_len[tail(ixs, n=1)]))
+
+      })
+
+      width_change[[paste("dw_fit_", w_range, sep="")]] = dw.fit
+      width_change[[paste("dw_avg_", w_range, sep="")]] = dw.avg
+
+    }
+
+    return(width_change)
+
+  }
+
   set = "set2" # ignored, only for debugging
 
   for(set in sets){
@@ -188,6 +228,9 @@ CM.processCenterline <- function(object, set=NULL){
         ### calculate width #######################################
         w    = apply(cbind(cp.r[,c(1,2)], cp.l[,c(1,2)]), 1, function(x){ ( (x[1]-x[3])^2 + (x[2]-x[4])^2 )^(1/2)    })
 
+        ### calculate width change ################################
+        dw   = CM.calculateWidthChange(data[[set.ref]]$cl[[cl.type]]$cum_dist_2d, w, par$metrics.local.change.range)
+
         notice("width calculated!")
 
         # check
@@ -196,20 +239,25 @@ CM.processCenterline <- function(object, set=NULL){
         if(length(data[[set.ref]]$cl[[cl.type]]$x) != length(d.l)) error("length of CL and CW differ!")
 
         # store
-        data[[set]]$metrics$cl.ref   = set.ref
-        data[[set]]$metrics$cl.type  = cl.type
-        data[[set]]$metrics$tr.span  = par$transects.span
+        data[[set]]$metrics$cl.ref      = set.ref
+        data[[set]]$metrics$cl.type     = cl.type
+        data[[set]]$metrics$tr.span     = par$transects.span
 
-        data[[set]]$metrics$tr       = tr
-        data[[set]]$metrics$cp.r     = cp.r[,c(1,2)]
-        data[[set]]$metrics$cp.l     = cp.l[,c(1,2)]
-        data[[set]]$metrics$d.r      = d.r
-        data[[set]]$metrics$d.l      = d.l
-        data[[set]]$metrics$w        = w
-        data[[set]]$metrics$r.r      = cp.r[,3]
-        data[[set]]$metrics$r.l      = cp.l[,3]
-        data[[set]]$metrics$diff.r   = if(set == set.ref) rep(0, length(w)) else -(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r - d.r * cp.r[,3])
-        data[[set]]$metrics$diff.l   = if(set == set.ref) rep(0, length(w)) else   data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l - d.l * cp.l[,3]
+        data[[set]]$metrics$tr          = tr
+        data[[set]]$metrics$cp.r        = cp.r[,c(1,2)]
+        data[[set]]$metrics$cp.l        = cp.l[,c(1,2)]
+        data[[set]]$metrics$d.r         = d.r
+        data[[set]]$metrics$d.l         = d.l
+        data[[set]]$metrics$w           = w
+        data[[set]]$metrics$r.r         = cp.r[,3]
+        data[[set]]$metrics$r.l         = cp.l[,3]
+        data[[set]]$metrics$diff.r      = if(set == set.ref) rep(0, length(w)) else -(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r - d.r * cp.r[,3])
+        data[[set]]$metrics$diff.l      = if(set == set.ref) rep(0, length(w)) else   data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l - d.l * cp.l[,3]
+
+        data[[set]]$metrics$slope       = data[[set]]$cl$smoothed$slope
+        data[[set]]$metrics$slope.range = par$centerline.local.slope.ran
+
+        data[[set]]$metrics             = modifyList(data[[set]]$metrics, dw)
 
         ### project features onto centerline
         if(typeof(data[[set]]$features) == "list"){
@@ -632,7 +680,8 @@ CM.processCenterline <- function(object, set=NULL){
 
                     "dh_min"          = lpz + dh_min,
 
-                    "dummy" = TRUE
+                    stringsAsFactors  = FALSE
+
                   ))
 
                 ix = ix + first_higher_point

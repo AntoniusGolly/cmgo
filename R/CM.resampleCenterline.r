@@ -160,12 +160,13 @@ CM.resampleCenterline <- function(object, set = NULL){
         bin_z = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$original$z[bin_ix]) else NA,
 
         # widths
-        width_median = median(data[[set]]$metrics$w[bin_ix]),
-        width_mean   = mean(data[[set]]$metrics$w[bin_ix]),
-        width_actual = data[[set]]$metrics$w[ix]
+        width_median  = median(data[[set]]$metrics$w[bin_ix]),
+        width_mean    = mean(data[[set]]$metrics$w[bin_ix]),
+        width_closest = data[[set]]$metrics$w[ix],
 
-        #slope_median = if(!is.null(data[[set]]$channel$z)) median(data[[set]]$metrics$slope[bin_ix]) else NA,
-        #slope_mean   = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$metrics$slope[bin_ix])   else NA
+        slope_median  = if(!is.null(data[[set]]$channel$z)) median(data[[set]]$metrics$slope[bin_ix]) else NA,
+        slope_mean    = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$metrics$slope[bin_ix])   else NA,
+        slope_closest = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$metrics$slope[ix])       else NA
 
       ))
 

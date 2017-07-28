@@ -81,7 +81,7 @@ CM.generatePolygon <- function(object){
 
       ## produce an overview plot on both ends of the river polygon
       if(FALSE){
-        for(i in c(min(which(data[[set]]$channel$bank==par$bank.code.left)), max(which(data[[set]]$channel$bank==par$bank.code.right)))){
+        for(i in c(min(which(data[[set]]$channel$bank=="left")), max(which(data[[set]]$channel$bank=="right")))){
 
           n = n+1
           title = "end"; if(n == 1) title ="start";
@@ -143,8 +143,8 @@ CM.generatePolygon <- function(object){
       data[[set]]$polygon.bank.reduce.min.dist      = NULL
 
 
-      ix.l = which(data[[set]]$channel$bank == par$bank.code.left)
-      ix.r = which(data[[set]]$channel$bank == par$bank.code.right)
+      ix.l = which(data[[set]]$channel$bank == "left")
+      ix.r = which(data[[set]]$channel$bank == "right")
 
       # check for existing bank codes
       if(length(ix.l) == 0) error(paste("no bank points found with the given code \"", par$bank.code.left,  "\". Check parameters!", sep=""))
