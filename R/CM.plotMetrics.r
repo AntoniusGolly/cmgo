@@ -40,10 +40,10 @@
 #'
 #' @export CM.plotMetrics
 
-CM.plotMetrics <- function(object, set="set1", cl=NULL, d=NULL){
+CM.plotMetrics <- function(cmgo.obj, set="set1", cl=NULL, d=NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   error     = function(x){stop(x, call.=FALSE)}
@@ -95,7 +95,7 @@ CM.plotMetrics <- function(object, set="set1", cl=NULL, d=NULL){
   }
 
   #dev.new(width=12, height=10)
-  notice("create bank retreat plot...", TRUE)
+  notice("create metrics plot...", TRUE)
 
   plots = c(1)
   par(mfcol=c(1,length(plots)))
@@ -138,7 +138,7 @@ CM.plotMetrics <- function(object, set="set1", cl=NULL, d=NULL){
       0,
       main = if(set == set.ref) paste("Bank position of", name.set) else paste("Bank shift of", name.set, "(solid) over", name.set.ref, "(dashed)"),
       ylim = c(-y.lim, y.lim),
-      xlim = c(data[[set.ref]]$cl$smoothed$cum_dist_2d[cl[1]],data[[set.ref]]$cl$smoothed$cum_dist_2d[cl[length(cl)]]),
+      xlim = c(data[[set.ref]]$cl$smoothed$cum_dist_2d[cl[1]], data[[set.ref]]$cl$smoothed$cum_dist_2d[cl[length(cl)]]),
       xlab = paste("Distance upstream [", par$input.unit, "]", sep=""),
       ylab = "Distance [m]",
       type = "n"
@@ -163,7 +163,7 @@ CM.plotMetrics <- function(object, set="set1", cl=NULL, d=NULL){
     if(set != set.ref){
       lines(data[[set]]$metrics$diff.r ~ length,                                         col = colors()[240], lty=1, lwd=8)
       lines(data[[set]]$metrics$diff.r ~ length,                                         col = "green", lty=6, lwd=2)
-      leg = leg.add(leg, paste("right bank shift", name.set, "over", name.set.ref),                col = "green", lty=6, lwd=2)
+      leg = leg.add(leg, paste("right bank shift", name.set, "over", name.set.ref),      col = "green", lty=6, lwd=2)
     }
 
 
@@ -184,6 +184,9 @@ CM.plotMetrics <- function(object, set="set1", cl=NULL, d=NULL){
       lines(data[[set]]$metrics$diff.l ~ length,                                         col = "red",   lty=6, lwd=2)
       leg = leg.add(leg, paste("left bank shift", name.set, "over", name.set.ref),                 col = "red",   lty=6, lwd=2)
     }
+    
+    ## width
+    #if()
 
     # legend and scale bar ####################################################
     if(par$plot.planview.legend) leg.make(leg)

@@ -4,10 +4,10 @@
 \alias{CM.plotMetrics}
 \title{Plot changes of the banks (erosion and aggradation)}
 \usage{
-CM.plotMetrics(object, set = "set1", cl = NULL, d = NULL)
+CM.plotMetrics(cmgo.obj, set = "set1", cl = NULL, d = NULL)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 
 \item{set}{the reference data set}
 

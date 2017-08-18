@@ -1,4 +1,4 @@
-#' Reduce centerline points
+#' Resample centerline points
 #'
 #' Create an equally spaced centerline with a given interval length.
 #'
@@ -18,15 +18,15 @@
 #' # get the demo data set
 #' cmgo.obj = CM.ini("demo2")
 #'
-#' # reduce centerline resolution
+#' # resample centerline resolution
 #' cmgo.obj = CM.resampleCenterline(cmgo.obj)
 #'
 #' @export CM.resampleCenterline
 
-CM.resampleCenterline <- function(object, set = NULL){
+CM.resampleCenterline <- function(cmgo.obj, set = NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
   sets = if(is.null(set)) names(data) else set
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
@@ -125,7 +125,7 @@ CM.resampleCenterline <- function(object, set = NULL){
   }
 
   cl.type = "smoothed"
-  set     = "set2"
+  set     = "set1"
 
   for(set in sets){
 
@@ -164,9 +164,9 @@ CM.resampleCenterline <- function(object, set = NULL){
         width_mean    = mean(data[[set]]$metrics$w[bin_ix]),
         width_closest = data[[set]]$metrics$w[ix],
 
-        slope_median  = if(!is.null(data[[set]]$channel$z)) median(data[[set]]$metrics$slope[bin_ix]) else NA,
-        slope_mean    = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$metrics$slope[bin_ix])   else NA,
-        slope_closest = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$metrics$slope[ix])       else NA
+        slope_median  = if(!is.null(data[[set]]$channel$z)) median(data[[set]]$cl$smoothed$slope[bin_ix]) else NA,
+        slope_mean    = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$smoothed$slope[bin_ix])   else NA,
+        slope_closest = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$smoothed$slope[ix])       else NA
 
       ))
 

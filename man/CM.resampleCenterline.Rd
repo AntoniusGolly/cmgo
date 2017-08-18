@@ -2,12 +2,12 @@
 % Please edit documentation in R/CM.resampleCenterline.r
 \name{CM.resampleCenterline}
 \alias{CM.resampleCenterline}
-\title{Reduce centerline points}
+\title{Resample centerline points}
 \usage{
-CM.resampleCenterline(object, set = NULL)
+CM.resampleCenterline(cmgo.obj, set = NULL)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 
 \item{set}{an optional argument for processing a specific data set, if \code{NULL} all available data sets are used}
 }
@@ -30,7 +30,7 @@ detail a coarser interval will decrease the length of the centerline.
 # get the demo data set
 cmgo.obj = CM.ini("demo2")
 
-# reduce centerline resolution
+# resample centerline resolution
 cmgo.obj = CM.resampleCenterline(cmgo.obj)
 
 }

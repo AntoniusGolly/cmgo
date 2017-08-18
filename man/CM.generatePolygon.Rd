@@ -4,10 +4,10 @@
 \alias{CM.generatePolygon}
 \title{Generate polygon from bank points}
 \usage{
-CM.generatePolygon(object)
+CM.generatePolygon(cmgo.obj)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 }
 \value{
 returns the global data object extended by the polygon data \code{$polygon} for the respective data set(s)

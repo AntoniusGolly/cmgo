@@ -4,10 +4,10 @@
 \alias{CM.processCenterline}
 \title{Process the centerline}
 \usage{
-CM.processCenterline(object, set = NULL)
+CM.processCenterline(cmgo.obj, set = NULL)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 
 \item{set}{an optional argument for processing a specific data set, if \code{NULL} all available data sets are used}
 }

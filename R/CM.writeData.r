@@ -33,10 +33,10 @@
 #'
 #' @export CM.writeData
 
-CM.writeData <- function(object){
+CM.writeData <- function(cmgo.obj){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   error     = function(x){stop(x, call.=FALSE)}
@@ -55,8 +55,6 @@ CM.writeData <- function(object){
     if(!file.exists(par$workspace.filename) || par$workspace.replace){
 
       notice("write workspace now...")
-
-      cmgo.obj = object
 
       save("cmgo.obj", file = par$workspace.filename)
       notice(paste("workspace saved to",par$workspace.filename))
@@ -131,6 +129,15 @@ CM.writeData <- function(object){
           "w", "d.r", "d.l", "r.r", "r.l", "diff.r", "diff.l"
         ))]
 
+        # add centerline information: location and cumulative length of centerline points
+        output = cbind(data.frame(
+            x           = data[[set]]$cl$smoothed$x,
+            y           = data[[set]]$cl$smoothed$y,
+            cum_dist_2d = data[[set]]$cl$smoothed$cum_dist_2d
+        ), output, stringsAsFactors = FALSE)
+
+
+        # write output
         write.table(
           output,
           file = output.filename, sep = par$output.sep,

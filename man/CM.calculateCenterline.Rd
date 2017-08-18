@@ -4,10 +4,10 @@
 \alias{CM.calculateCenterline}
 \title{Calculate channel centerline}
 \usage{
-CM.calculateCenterline(object, set = NULL)
+CM.calculateCenterline(cmgo.obj, set = NULL)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 
 \item{set}{an optional argument for processing a specific data set, if \code{NULL} all available data sets are used}
 }

@@ -56,10 +56,10 @@
 #'
 #' @export CM.processCenterline
 
-CM.processCenterline <- function(object, set=NULL){
+CM.processCenterline <- function(cmgo.obj, set=NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
   sets = if(is.null(set)) names(data) else set
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
@@ -67,6 +67,8 @@ CM.processCenterline <- function(object, set=NULL){
   warn      = function(x){warning(x, call.=FALSE)}
 
   notice("process centerline (calculate channel metrics)", TRUE)
+
+
 
   CM.calculateIntersections = function(tr, cb){
 
@@ -94,7 +96,7 @@ CM.processCenterline <- function(object, set=NULL){
     Y      = Y[d.ix]
 
     # get direction
-    r      = X - tr["Px"]
+    r = (X - tr["Px"]) / tr["m"]  #r = X - tr["Px"] ## bug: consider not only plain X-coordinate!!
     r      = if(r < 0) -1 else if(r > 0) 1 else 0
 
     # return
@@ -147,6 +149,7 @@ CM.processCenterline <- function(object, set=NULL){
 
   }
 
+
   CM.calculateWidthChange = function(cl_len, w, width_range){
 
     width_change = list()
@@ -160,7 +163,7 @@ CM.processCenterline <- function(object, set=NULL){
         ixs = which(cl_len >= x & cl_len < (x + w_range))
 
         # fit a line through values
-        w_fit = lm(w[ixs] ~ rev(cl_len[ixs]))
+        w_fit = if(!all(is.na(w[ixs]))) lm(w[ixs] ~ rev(cl_len[ixs])) else return(NA)
 
         # return slope of fit
         return (w_fit$coefficients[2])
@@ -187,7 +190,7 @@ CM.processCenterline <- function(object, set=NULL){
 
   }
 
-  set = "set2" # ignored, only for debugging
+  set = "set1" # ignored, only for debugging
 
   for(set in sets){
 

@@ -72,17 +72,17 @@
 #'
 #' @export CM.calculateCenterline
 
-CM.calculateCenterline <- function(object, set=NULL){
+CM.calculateCenterline <- function(cmgo.obj, set=NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
   sets = if(is.null(set)) names(data) else set
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   error     = function(x){stop(x, call.=FALSE)}
   alert     = function(x, y=""){if(y!=""){message(paste("--> ",x, y, sep=""))}else{message(paste("--> ", x, sep=""))}}
   warn      = function(x){warning(x, call.=FALSE)}
-  plot.file = function(par){if(!par$plot.to.file) return(NULL); file.no   = 0 + par$plot.index; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep=""); while(file.exists(paste(file.name, ".png", sep="")) || file.exists(paste(file.name, ".pdf", sep=""))){  file.no   = file.no + 1; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep="") }; dev.copy(png, filename=paste(file.name, ".png", sep=""), width=800, height=600); dev.off(); dev.copy2pdf(file=paste(file.name, ".pdf", sep=""));}
+  plot.file = function(par){if(!par$plot.to.file) return(NULL); file.no = 0 + par$plot.index; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep=""); while(file.exists(paste(file.name, ".png", sep="")) || file.exists(paste(file.name, ".pdf", sep=""))){  file.no   = file.no + 1; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep="") }; dev.copy(png, filename=paste(file.name, ".png", sep=""), width=800, height=600); dev.off(); dev.copy2pdf(file=paste(file.name, ".pdf", sep=""));}
 
   notice("calculate centerline", TRUE)
 
@@ -130,7 +130,7 @@ CM.calculateCenterline <- function(object, set=NULL){
         || isTRUE(data[[set]]$cl$bank.reduce.min.dist      != data[[set]]$polygon.bank.reduce.min.dist)
       ){
 
-        # notice
+        # notice to console
         notice(paste("calculate based on dense polygon with a maximum bank point distance of ", par$bank.interpolate.max.dist, sep=""))
         notice(paste("calculate based on dense polygon with a minimum bank point distance of ", par$bank.reduce.min.dist, sep=""))
         reasons = c()
@@ -149,7 +149,7 @@ CM.calculateCenterline <- function(object, set=NULL){
 
         # calculate voronoi polygons => create paths from polygons => remove duplicated paths
         voronoi = dirichlet(data[[set]]$polygon)                    # create voronoi polygons
-        tiles   = sapply(voronoi$tiles, "[[", "bdry")                # get individual tile coordinates
+        tiles   = sapply(voronoi$tiles, "[[", "bdry")               # get individual tile coordinates
         paths   = do.call(rbind, lapply(tiles, function(tile){      # disassemble paths of tiles
           return(data.frame(
             x1 = tile$x,
@@ -228,9 +228,10 @@ CM.calculateCenterline <- function(object, set=NULL){
           # display interation and check for max
           remove.iteration = remove.iteration + 1
           if(remove.iteration > par$bank.filter2.max.it){ warn(paste("\n### exit due to maximum iterations (max. iterations = ", par$bank.filter2.max.it, ") ###", "\nNote: this may be caused by gaps that opened in the centerline due to\njagged centerline paths. First, check for gaps visually with CM.plotPlanView(cmgo.obj, set=\"",set,"\", error=1). \nYou can than either repair these gaps by editing the centerline paths manually or \nsimply increase the bank resolution via parameter par$bank.interpolation.max.dist!", sep=""));
-            data[[set]]$cl$errors.filter2       = paths.in.polygon[remove.ixs,          c("x1", "y1")];
-            data[[set]]$cl$errors.filter2.first = paths.in.polygon[remove.ixs.first.it, c("x1", "y1")];
-            data[[set]]$cl$cl.paths             = cl.paths
+            data[[set]]$cl$errors.filter2       = cl.paths[remove.ixs,          c("x1", "y1")];
+            data[[set]]$cl$errors.filter2.first = cl.paths[remove.ixs.first.it, c("x1", "y1")];
+            data[[set]]$cl$cl.paths.tmp         = cl.paths
+            data[[set]]$cl$errors.filter2.ixs   = remove.ixs
             return(list(
               data = data,
               par  = par
@@ -243,12 +244,16 @@ CM.calculateCenterline <- function(object, set=NULL){
             data.frame(x = c(cl.paths[,"x1"], cl.paths[,"x2"]), y = c(cl.paths[,"y1"], cl.paths[,"y2"])),
             data.frame(x = data[[set]]$cl$ends.x,               y = data[[set]]$cl$ends.y)
           )
-          ### calculate number of connections of each path
-          remove.ixs = which(apply(cl.paths, 1, function(path){
-            con1 = nrow(merge(cl.points, path[c("x1", "y1")])) < 2 # time intensive
-            con2 = nrow(merge(cl.points, path[c("x2", "y2")])) < 2 # time intensive
-            return(any(con1 + con2))
-          }))
+          ### calculate number of connections of each path (each and must have two)
+          remove.ixs = which(!(duplicated(cl.points) | duplicated(cl.points, fromLast = TRUE)))
+          remove.ixs[which(remove.ixs > nrow(cl.paths))] = remove.ixs[which(remove.ixs > nrow(cl.paths))] - nrow(cl.paths)
+
+          #remove.ixs = which(apply(cl.paths, 1, function(path){
+          #  con1 = nrow(merge(cl.points, path[c("x1", "y1")])) < 2 # time intensive
+          #  con2 = nrow(merge(cl.points, path[c("x2", "y2")])) < 2 # time intensive
+          #  return(any(con1 + con2))
+          #}))
+
 
           # get points to remove
           if(is.null(remove.ixs.first.it)) remove.ixs.first.it = remove.ixs
@@ -282,40 +287,57 @@ CM.calculateCenterline <- function(object, set=NULL){
       notice("step 4 of 5: sort points...", TRUE)
       if(is.null(data[[set]]$cl$original)){
 
+        # cl is the final product, add two points first
         cl = data.frame(x = data[[set]]$cl$ends.x[1], y = data[[set]]$cl$ends.y[1])
-        sort.continue = TRUE
-        perc = nrow(cl.paths)
-        perc.lev = 0
-        if(perc > 1000) notice("0%")
 
+        # ordered list of cl.paths
+        cl.paths.pairs = data.frame(x = c(cl.paths$x1, cl.paths$x2), y = c(cl.paths$y1, cl.paths$y2))
+
+        sort.continue = TRUE
+        perc = nrow(cl.paths.pairs)
+        perc.lev = 0
+
+        ## plot percentage if more than 1000 points on centerline exists (if less it doesn't make sense since it is fast enough)
+        if(perc > 1000) notice("0%")
 
         while(sort.continue){
 
           this = as.numeric(tail(cl, n=1))
 
           # create progress notice
-          perc.ac = round((perc - nrow(cl.paths)) / perc * 100)
+          perc.ac = round((perc - nrow(cl.paths.pairs)) / perc * 100)
           if((perc > 1000) && (perc.ac > (perc.lev + 10))){perc.lev = perc.lev + 10; notice(paste(perc.lev,"%", sep=""))}
 
-          # find connected segments
-          match = which(apply(cl.paths, 1, function(row){
-            any(identical(this, as.numeric(row[c(1,2)])), identical(this, as.numeric(row[c(3,4)])))
-          }))
+          # find match (first point of segment)
+          match = which(cl.paths.pairs$x == this[1] & cl.paths.pairs$y == this[2])
 
 
-          if(length(match) != 1){
+          # check number of machthes (must be one during sort or 0 at end)
+          if(length(match) == 1){
+
+            # find opposite (second point of segment)
+            other = if(match <= nrow(cl.paths.pairs) / 2) match + nrow(cl.paths.pairs) / 2 else match - nrow(cl.paths.pairs) / 2
+
+            # store point
+            cl = rbind(cl, cl.paths.pairs[other,])
+
+            # remove from paths
+            cl.paths.pairs = cl.paths.pairs[-c(match, other),]
+
+          } else {
 
             if(all(this == c(data[[set]]$cl$ends.x[2], data[[set]]$cl$ends.y[2]))){
 
+              if(perc.lev < 100) notice("100%")
               notice("sorting done successfully!")
 
-              sort.continue = FALSE
-              next
+              # set while condition false and go to next iteration which effectively ends the while loop
+              sort.continue = FALSE; next
 
             } else {
 
               warn(paste("number of connections should be 1 but is", length(match)))
-              warn("call CM.plotPlanView(cmgo.obj, set=\"",set,"\", error=1, error.type=\"errors.sort\") to resolve")
+              warn(paste("call CM.plotPlanView(cmgo.obj, set=\"",set,"\", error=1, error.type=\"errors.sort\") to resolve", sep=""))
 
               data[[set]]$cl$errors.sort = matrix(this, ncol=2)
 
@@ -328,20 +350,9 @@ CM.calculateCenterline <- function(object, set=NULL){
 
           }
 
-          if(all(this == cl.paths[match,1:2])) pos = c(3,4)
-          if(all(this == cl.paths[match,3:4])) pos = c(1,2)
-
-          # store point
-          #point = cl.paths[match, this!=cl.paths[match,]]
-          point = cl.paths[match, pos]
-          cl    = rbind(cl, data.frame(x = point[[1]], y = point[[2]]))
-
-          # remove from paths
-          cl.paths = cl.paths[-match, ]
-
         } # while(sort.continue)
 
-        # add start/end point from banks
+        # add start/end point from banks, NOTE: this is not the first/last cl path point but an interpolated point to create nicer ends
         cl = rbind(cl.start, cl, cl.end)
 
         # store
@@ -396,9 +407,11 @@ CM.calculateCenterline <- function(object, set=NULL){
 
       ### project elevation #####################################
 
+      notice("project elevation...", TRUE)
+
       if(!is.null(data[[set]]$channel$z)){
 
-        notice("elevation information found: project elevation to centerline", TRUE)
+        notice("elevation information found: project elevation of banks to centerline", TRUE)
 
         ## on original centerline
         lp_closest = apply(cbind(cl$original$x, cl$original$y), 1, function(x){

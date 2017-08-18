@@ -73,7 +73,7 @@ CM.ini <- function(object = "demo", par = NULL){
   error     = function(x){stop(x, call.=FALSE)}
 
   # print program information to the screen
-  cat(rep("\n",10), "\n", paste(rep("-",54), collapse=""), "\n---", paste(rep(" ",48), collapse=""), "---\n---", paste(rep(" ",15), collapse=""),"ChannelMetrics v.1",paste(rep(" ",15), collapse=""),"---\n---", paste(rep(" ",48), collapse=""), "---\n",paste(rep("-",54), collapse=""),  "\nv.1.00 by Antonius Golly (golly@gfz-potsdam.de)\n", sep="");
+  cat(rep("\n",10), "\n", paste(rep("-",54), collapse=""), "\n---", paste(rep(" ",48), collapse=""), "---\n---", paste(rep(" ",15), collapse=""),"ChannelMetrics v.1",paste(rep(" ",15), collapse=""),"---\n---", paste(rep(" ",48), collapse=""), "---\n",paste(rep("-",54), collapse=""),  "\nv",as.character(packageVersion("cmgo"))," by Antonius Golly (antonius.golly@gmail.com)\n", sep="");
 
 
   # user notice
@@ -126,6 +126,7 @@ CM.ini <- function(object = "demo", par = NULL){
       table = read.table(paste(par$input.dir, "/", file, sep=""), sep=par$input.sep, header=TRUE, stringsAsFactors=FALSE, na.strings="-")
       set   = paste("set", which(files == file), sep="")
 
+
       data[[set]] = list(
 
         filename = file,
@@ -161,6 +162,23 @@ CM.ini <- function(object = "demo", par = NULL){
         data[[set]]$channel$z[ix.r] = rev(data[[set]]$channel$z[ix.r])
 
       }
+
+      # check for x-y coordinate duplicates
+      d.ixs = duplicated(data.frame(
+        x = data[[set]]$channel$x,
+        y = data[[set]]$channel$y
+      ))
+      if(any(d.ixs)){
+        notice(paste("found", length(which(d.ixs)), "points in input data with identical x-y-coordinates"))
+        data[[set]]$channel$x    = data[[set]]$channel$x[!d.ixs]
+        data[[set]]$channel$y    = data[[set]]$channel$y[!d.ixs]
+        data[[set]]$channel$z    = data[[set]]$channel$z[!d.ixs]
+        data[[set]]$channel$bank = data[[set]]$channel$bank[!d.ixs]
+        notice("duplicates removed!")
+      }
+
+
+
 
       notice(paste("file '", file, "' assigned to ", set, sep=""))
 

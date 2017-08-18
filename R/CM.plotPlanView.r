@@ -52,10 +52,10 @@
 #'
 #' @export CM.plotPlanView
 
-CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, extent=NULL, zoom = FALSE, zoom.length = NULL, cl=NULL, error=NULL, error.type="errors.filter2", x=NULL, y=NULL){
+CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, extent=NULL, zoom = FALSE, zoom.length = NULL, cl=NULL, error=NULL, error.type="errors.filter2", x=NULL, y=NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   plot.file = function(par){if(!par$plot.to.file) return(NULL); file.no   = 0 + par$plot.index; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep=""); while(file.exists(paste(file.name, ".png", sep="")) || file.exists(paste(file.name, ".pdf", sep=""))){  file.no   = file.no + 1; file.name = paste(par$plot.directory, str_pad(file.no, 3, pad="0"), "_", par$plot.filename, sep="") }; dev.copy(png, filename=paste(file.name, ".png", sep=""), width=800, height=600); dev.off(); dev.copy2pdf(file=paste(file.name, ".pdf", sep=""));}
@@ -117,7 +117,9 @@ CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, ex
 
     # specify zoom
     zoom        = if(is.null(zoom))        par$plot.zoom               else zoom
+    zoom        = if(is.null(error))       zoom                        else TRUE
     zoom.length = if(is.null(zoom.length)) par$plot.zoom.extent.length else zoom.length
+
 
 
     # specify plot extent #####################################################
@@ -159,6 +161,11 @@ CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, ex
       plot.extent.rule = if(plot.extent.rule == "x-coordinate") "x/y-coordinates" else "y-coordinate"
     }
 
+    ### determine extend
+    x.lim  = if(zoom) plot.x + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$x)
+    y.lim  = if(zoom) plot.y + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$y)
+
+
     # output to console
     notice(paste("plot extend determined by:", plot.extent.rule))
     notice("to show full extend use CM.plotPlanView(cmgo.obj, zoom=FALSE)", TRUE)
@@ -174,18 +181,21 @@ CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, ex
     name.set.secondary = if(!is.null(set.secondary)) {if(par$plot.planview.use.names) data[[set.secondary]]$survey else set.secondary} else "not used"
 
 
+
+
     ### create empty plot ###
     plot(0,
       main = if(is.null(title)){ paste("Plan view of", name.set, if(!is.null(set.compare)){ paste("(solid) and", if(is.null(set.compare)) "reference", name.set.secondary, "(dashed)")})} else {title},
-      xlim = if(zoom) plot.x + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$x),
-      ylim = if(zoom) plot.y + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$y),
+      xlim = x.lim,
+      ylim = y.lim,
       asp=1, type="n", xlab="X", ylab="Y"
     )
 
     # grid ####################################################################
+    grid.dist = if(is.null(par$plot.planview.grid.dist)) round((x.lim[2]- x.lim[1] / 5)) else par$plot.planview.grid.dist
     if(par$plot.planview.grid){
-      abline(v=seq(floor(floor(plot.x - zoom.length)/100)*100, ceiling(ceiling(plot.x + zoom.length)/100)*100, par$plot.planview.grid.dist), col=colors()[356])
-      abline(h=seq(floor(floor(plot.y - zoom.length)/100)*100, ceiling(ceiling(plot.y + zoom.length)/100)*100, par$plot.planview.grid.dist), col=colors()[356])
+      abline(v=seq(floor(floor(min(x.lim))/100)*100, ceiling(ceiling(max(x.lim))/100)*100, grid.dist), col=colors()[356])
+      abline(h=seq(floor(floor(min(y.lim))/100)*100, ceiling(ceiling(max(y.lim))/100)*100, grid.dist), col=colors()[356])
     }
 
     # voronoi polygons ########################################################
@@ -198,7 +208,8 @@ CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, ex
 
     if(!is.null(error)){
       if(!is.null(data[[set]]$cl$paths))           {segments(data[[set]]$cl$paths$x1, data[[set]]$cl$paths$y1, data[[set]]$cl$paths$x2, data[[set]]$cl$paths$y2, col="lightgray"); leg = leg.add(leg, "voronoi polygons", lty=1, col="gray")}
-      if(!is.null(data[[set]]$cl$cl.paths)){segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="red");leg = leg.add(leg, "cl paths during iteration", lty=1, col="red")}
+      if(!is.null(data[[set]]$cl$cl.paths))        {segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="red");leg = leg.add(leg, "cl paths during iteration", lty=1, col="red")}
+      #segments(data[[set]]$cl$cl.paths$x1[ii], data[[set]]$cl$cl.paths$y1[ii], data[[set]]$cl$cl.paths$x2[ii], data[[set]]$cl$cl.paths$y2[ii], col="blue")
     }
 
     # second polygon for comparison
@@ -273,23 +284,24 @@ CM.plotPlanView <- function(object, set="set1", title=NULL, set.compare=NULL, ex
 
     # cl-binned ###############################################################
     if(par$plot.planview.cl.binned){
-      points(data[[set.cl.ref]]$cl$binned$x, data[[set.cl.ref]]$cl$binned$y, pch=18, col="blue", cex=2.2)      
-      #points(data[[set.cl.ref]]$cl$binned$bin_x, data[[set.cl.ref]]$cl$binned$bin_y, pch=18, col="blue", cex=2.2)      
+      points(data[[set.cl.ref]]$cl$binned$x, data[[set.cl.ref]]$cl$binned$y, pch=18, col="blue", cex=2.2)
+      #points(data[[set.cl.ref]]$cl$binned$bin_x, data[[set.cl.ref]]$cl$binned$bin_y, pch=18, col="blue", cex=2.2)
       leg = leg.add(leg, "re-binned centerline", pch=18, col="blue", cex=1.2)
     }
 
     # legend and scale bar ####################################################
     if(par$plot.planview.legend) leg.make(leg, par)
     if(par$plot.planview.scalebar){
+
       segments(
-        plot.x + 0.5 * zoom.length - par$plot.planview.grid.dist,
+        plot.x + 0.5 * zoom.length - grid.dist,
         plot.y - 0.5 * zoom.length,
         plot.x + 0.5 * zoom.length,
         plot.y - 0.5 * zoom.length,
         lwd = 15, lend=2
       )
       text(
-        plot.x + 0.5 * zoom.length - (0.5 * par$plot.planview.grid.dist),
+        plot.x + 0.5 * zoom.length - (0.5 * grid.dist),
         plot.y - 0.5 * zoom.length + zoom.length / 30,
         paste(par$plot.planview.grid.dist, "m")
       )

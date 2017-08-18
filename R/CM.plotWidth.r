@@ -35,10 +35,10 @@
 #'
 #' @export CM.plotWidth
 
-CM.plotWidth <- function(object, set="set1", set.compare=NULL, cl=NULL, d=NULL){
+CM.plotWidth <- function(cmgo.obj, set="set1", set.compare=NULL, cl=NULL, d=NULL){
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   error     = function(x){stop(x, call.=FALSE)}

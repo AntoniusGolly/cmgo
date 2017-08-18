@@ -60,6 +60,7 @@ CM.par <- function(par.set=NULL){
 
     # name of the parameter set
     name                        = "default",
+    version                     = "0.1.4",
 
     # workspace
     workspace.read              = TRUE,        # if [TRUE] it is tried to load the global data object from a workspace file in CM.ini()
@@ -112,13 +113,15 @@ CM.par <- function(par.set=NULL){
     plot.planview.transects.len = 20,          # give the length of transects in the unit of the input coordinates
     plot.planview.dist2banks    = TRUE,        # in the plan view plot, add transect segments from centerline to the banks (left and right)
     plot.planview.grid          = TRUE,        # in the plan view plot, add a grid in the background
-    plot.planview.grid.dist     = 20,          # the distance of the grid lines in the unit of the input coordinates
+    plot.planview.grid.dist     = NULL,        # the distance of the grid lines in the unit of the input coordinates, if NULL it will be calculated automatically
     plot.planview.legend        = TRUE,        # in the plan view plot, add a legend
     plot.planview.legend.pos    = "topleft",   # keyword to position legend (see ?legend)
     plot.planview.scalebar      = TRUE,        # in the plan view plot, add a scalebar (width of one plot.planview.grid.dist)
     plot.planview.use.names     = TRUE,        # if [TRUE] set names will be used for display, otherwise "set1", "set2", etc.
 
     plot.metrics.use.names      = TRUE,        # if [TRUE] set names will be used for display, otherwise "set1", "set2", etc.
+    plot.metrics.width          = TRUE,        # if [TRUE] plot width
+
 
     # plot options
     plot.zoom                   = TRUE,        # if [TRUE] the plan view plot is zoomed in (see also CM.plotPlanView())
@@ -148,20 +151,21 @@ CM.par <- function(par.set=NULL){
     bank.interpolate.max.dist   = 6,           # if bank.interpolate is [TRUE] this is the maximum distance all bank points will have
     bank.reduce                 = FALSE,       # if [TRUE] the provided bank points are reduced by points that are closer to each other than bank.reduce.min.dist
     bank.reduce.min.dist        = 0.5,         # if bank.reduce is [TRUE] this is the minimum distance all bank point will have
-    bank.filter2.max.it         = 12,          # number of the maximum iterations for filter 2 to prevent the program to run infinitely
+    bank.filter2.max.it         = 20,          # number of the maximum iterations for filter 2 to prevent the program to run infinitely
     centerline.smoothing.width  = 7,           # smoothing window width of mean filter in number of observations (see CM.calculateCenterline())
     centerline.local.slope.range= 15,
     transects.span              = 3,           # span of centerline points used for calculating the transects (see CM.processCenterline())
     centerline.bin.length       = 5,           # for simplifying the centerline give the spacing in the unit of the input coordinates (see CM.reduceCenterline())
     centerline.use.reference    = FALSE,       # sets method for calculating distance centerline to banks, if [FALSE] (default) each river profile will be compared to its own centerline, if [TRUE] the centerline of centerline.reference will be taken (see CM.processCenterline())
     centerline.reference        = "set1",      # sets the reference data set if centerline.use.reference is [TRUE]
-    calculate.metrics           = TRUE,        # if [TRUE] all centerline metrics are calculated (see CM.processCenterline())
     force.calc.metrics          = FALSE,       # if [TRUE] the metrics  are always re-calculated and never taken from cache
+    calculate.metrics           = TRUE,        # if [TRUE] all centerline metrics are calculated (see CM.processCenterline())
+    calculate.metrics.dw        = FALSE,       # defines whether or not the change of the width shall be calculated
     metrics.local.change.range  = 5,           # the upstream range over which metric changes are derived (e.g. width change)
 
     # step identification after Zimmermann et. al 2008 [Zimmermann, A.E., Church, M., and Hassan, M. a., 2008, Identification of steps and pools from stream longitudinal profile data: Geomorphology, v. 102, no. 3–4, p. 395–406, doi: 10.1016/j.geomorph.2008.04.009.)]
-    steps.identify              = TRUE,
-    steps.verbose               = FALSE,       # should there be
+    steps.identify              = FALSE,
+    steps.verbose               = FALSE,       # should there be information printed to the screen during step identification
     steps.thalweg.dist          = "3d",        # chose method of distance calculation "3d" or "2d"
     steps.minimum.step.length   = 2.25,        # as percentage of Wb [%]
     steps.maximum.step.length   = 200,         # as percentage of Wb [%]

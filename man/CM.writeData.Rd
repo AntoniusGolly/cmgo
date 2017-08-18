@@ -4,10 +4,10 @@
 \alias{CM.writeData}
 \title{Write data}
 \usage{
-CM.writeData(object)
+CM.writeData(cmgo.obj)
 }
 \arguments{
-\item{object}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
+\item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}
 }
 \value{
 This file function does not return any value.

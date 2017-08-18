@@ -45,7 +45,7 @@
 #' @importFrom grDevices colors dev.copy dev.copy2pdf dev.off graphics.off png
 #' @importFrom graphics abline legend lines plot points segments text
 #' @importFrom stats lm median princomp
-#' @importFrom utils data head modifyList read.table tail write.table str
+#' @importFrom utils data head modifyList read.table tail write.table str packageVersion
 #' @importFrom stringr str_pad
 #' @importFrom spatstat dirichlet ppp psp owin nncross
 #' @importFrom sp point.in.polygon

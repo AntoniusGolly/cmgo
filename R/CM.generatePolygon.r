@@ -61,12 +61,12 @@
 #'
 #' @export CM.generatePolygon
 
-CM.generatePolygon <- function(object){
+CM.generatePolygon <- function(cmgo.obj){
 
-  plotCheckPolygon <- function(object){
+  plotCheckPolygon <- function(cmgo.obj){
 
-    par  = object$par
-    data = object$data
+    par  = cmgo.obj$par
+    data = cmgo.obj$data
 
     notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
 
@@ -101,7 +101,7 @@ CM.generatePolygon <- function(object){
         }
       }
 
-      if(length(names(data)) > 1) cat ("Press [Enter] to continue"); line <- readline()
+      if(length(names(data)) > 1) {cat ("Press [Enter] to continue"); line <- readline()}
 
     }
 
@@ -109,8 +109,8 @@ CM.generatePolygon <- function(object){
 
   } # plotCheckPolygon
 
-  par  = object$par
-  data = object$data
+  par  = cmgo.obj$par
+  data = cmgo.obj$data
 
   notice    = function(x,prim=FALSE){cat(paste((if(prim) "\n--> " else " "), x, sep=""), sep="\n")}
   error     = function(x){stop(x, call.=FALSE)}
