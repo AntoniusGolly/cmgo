@@ -1,7 +1,7 @@
 Package: cmgo
 Type: Package
 Title: Derive principle Channel metrics from bank points
-Version: 0.1.4
+Version: 0.1.5
 Author: Antonius Golly
 Maintainer: Antonius Golly <antonius.golly@gmail.com>
 Description: The package generates principle channel metrics (gradient, width, etc.) from channel bank points. The channel bank points can be GPS survey points or can be digitized banks from a GIS. Based on this channel geometry cmgo calculates the width at each location. It also allows to compare series of channel shapes. cmgo can write the files for further use in R or other scripting languages and offers to plotting functions to compare the results.

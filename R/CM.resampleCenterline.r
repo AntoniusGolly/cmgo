@@ -129,7 +129,7 @@ CM.resampleCenterline <- function(cmgo.obj, set = NULL){
 
   for(set in sets){
 
-    notice(paste("resample centerline of", set))
+    notice(paste("resample centerline of", set), TRUE)
 
     ixs = length(data[[set]]$cl$smoothed$cum_dist_2d)
     l   = data[[set]]$cl$smoothed$cum_dist_2d[ixs]
@@ -153,22 +153,28 @@ CM.resampleCenterline <- function(cmgo.obj, set = NULL){
         notice(paste("no points in bin ", x, "! take nearest point...", sep=""))
       }
 
-      return(data.frame(
+      df = data.frame(
 
         bin_x = mean(data[[set]]$cl[[cl.type]]$x[bin_ix]),
         bin_y = mean(data[[set]]$cl[[cl.type]]$y[bin_ix]),
-        bin_z = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$original$z[bin_ix]) else NA,
+        bin_z = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$original$z[bin_ix]),
 
         # widths
         width_median  = median(data[[set]]$metrics$w[bin_ix]),
         width_mean    = mean(data[[set]]$metrics$w[bin_ix]),
-        width_closest = data[[set]]$metrics$w[ix],
+        width_closest = data[[set]]$metrics$w[ix]
 
-        slope_median  = if(!is.null(data[[set]]$channel$z)) median(data[[set]]$cl$smoothed$slope[bin_ix]) else NA,
-        slope_mean    = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$smoothed$slope[bin_ix])   else NA,
-        slope_closest = if(!is.null(data[[set]]$channel$z)) mean(data[[set]]$cl$smoothed$slope[ix])       else NA
+      )
 
-      ))
+      for(slope in par$centerline.local.slope.range){
+
+        df[[paste("slope_median_",  slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else median(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][bin_ix])
+        df[[paste("slope_mean_",    slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][bin_ix])
+        df[[paste("slope_closest_", slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][ix])
+
+      }
+
+      return(df)
 
     }))
 

@@ -68,16 +68,24 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
 
   notice("process centerline (calculate channel metrics)", TRUE)
 
-
-
   CM.calculateIntersections = function(tr, cb){
+
+    ## get special cases
+    horizontals = which(cb[,"Ny"] - cb[,"Py"] == 0)
+    verticals   = which(cb[,"Nx"] - cb[,"Px"] == 0)
 
     # create all crossing points
     cp.Px  = (cb[,"n"] - tr["n"]) / (tr["m"] - cb[,"m"])
+    cp.Px[verticals] = cb[verticals, "Px"]
     cp.Py  = tr["m"] * cp.Px + tr["n"]
 
     # get scalar factors to filter to those which cross bank segments
     scalar = (cp.Py - cb[,"Py"]) / (cb[,"Ny"]  - cb[,"Py"])
+    # scalar calculations fail for segments that horizontal, fix it:
+    scalar[horizontals] = (cp.Px[horizontals] - cb[horizontals,"Px"]) / (cb[horizontals,"Nx"]  - cb[horizontals,"Px"])
+
+
+    # get all crossing coordinates
     X      = cp.Px[scalar >= 0 & scalar <= 1]
     Y      = cp.Py[scalar >= 0 & scalar <= 1]
 
@@ -92,6 +100,7 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
       return(c(NA, NA, NA))
     }
 
+    # get final crossing coordinate
     X      = X[d.ix]
     Y      = Y[d.ix]
 
@@ -256,9 +265,6 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
         data[[set]]$metrics$r.l         = cp.l[,3]
         data[[set]]$metrics$diff.r      = if(set == set.ref) rep(0, length(w)) else -(data[[set.ref]]$metrics$d.r * data[[set.ref]]$metrics$r.r - d.r * cp.r[,3])
         data[[set]]$metrics$diff.l      = if(set == set.ref) rep(0, length(w)) else   data[[set.ref]]$metrics$d.l * data[[set.ref]]$metrics$r.l - d.l * cp.l[,3]
-
-        data[[set]]$metrics$slope       = data[[set]]$cl$smoothed$slope
-        data[[set]]$metrics$slope.range = par$centerline.local.slope.ran
 
         data[[set]]$metrics             = modifyList(data[[set]]$metrics, dw)
 

@@ -60,7 +60,7 @@ CM.par <- function(par.set=NULL){
 
     # name of the parameter set
     name                        = "default",
-    version                     = "0.1.4",
+    version                     = "0.1.5",
 
     # workspace
     workspace.read              = TRUE,        # if [TRUE] it is tried to load the global data object from a workspace file in CM.ini()
