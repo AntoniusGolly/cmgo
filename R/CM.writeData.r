@@ -87,8 +87,7 @@ CM.writeData <- function(cmgo.obj){
         centerline_y = data[[set]]$cl$smoothed$y,
         centerline_z = if(is.null(data[[set]]$cl$smoothed$z)) rep(NA, length(data[[set]]$cl$smoothed$x)) else data[[set]]$cl$smoothed$z,
         length       = data[[set]]$cl$smoothed$cum_dist_2d,
-        seg_length   = data[[set]]$cl$smoothed$seg_dist_2d,
-        slope        = data[[set]]$cl$smoothed$slope
+        seg_length   = data[[set]]$cl$smoothed$seg_dist_2d
       )
 
       write.table(
