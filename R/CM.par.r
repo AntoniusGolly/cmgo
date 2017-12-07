@@ -100,6 +100,7 @@ CM.par <- function(par.set=NULL){
     plot.planview               = TRUE,        # create a plan view overview plot
     plot.planview.secondary     = TRUE,        # in the plan view plot, add a secodary data set for comparison (will be displayed in dashed lines)
     plot.planview.bankpoints    = FALSE,       # in the plan view plot, add the bank points of a data set
+    plot.planview.bankpoints.col= FALSE,       # if [TRUE] bank points will be colored by side (left/right)
     plot.planview.bankpoints.interpolated = FALSE,       # in the plan view plot, add the interpolated bank points of a data set
     plot.planview.polygon       = TRUE,        # in the plan view plot, add the channel borders
     plot.planview.voronoi       = FALSE,       # in the plan view plot, add voronoi polygons in plan view plot
@@ -125,7 +126,7 @@ CM.par <- function(par.set=NULL){
 
     # plot options
     plot.zoom                   = TRUE,        # if [TRUE] the plan view plot is zoomed in (see also CM.plotPlanView())
-    plot.zoom.extent.length     = 140,         # zoom window extent for the plan view plot in the unit of the input coordinates
+    plot.zoom.extent.length     = NULL,        # zoom window extent for the plan view plot in the unit of the input coordinates
     plot.zoom.extent            = "e1",        # applied zoom window name (see also CM.plotPlanView())
     plot.zoom.extents           = list(        # presets (customizable list) of zoom windows
       e1  = c(400480,  3103130),

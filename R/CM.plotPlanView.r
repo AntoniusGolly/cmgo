@@ -53,7 +53,7 @@
 #' @export CM.plotPlanView
 
 CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, extent=NULL, zoom = FALSE, zoom.length = NULL, cl=NULL, error=NULL, error.type="errors.filter2", x=NULL, y=NULL){
-
+  
   par  = cmgo.obj$par
   data = cmgo.obj$data
 
@@ -114,22 +114,36 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
     set.ref       = data[[set]]$metrics$cl.ref                       ; if(is.null(set.ref)) set.ref = FALSE
     set.secondary = if(is.null(set.compare)) set.ref else set.compare; if(!is.null(set.secondary)) if(!set.secondary %in% names(data)) set.secondary = NULL
     set.cl.ref    = if(par$plot.cl.range.use.reference) set.ref else set
-
+        
     # specify zoom
     zoom        = if(is.null(zoom))        par$plot.zoom               else zoom
     zoom        = if(is.null(error))       zoom                        else TRUE
-    zoom.length = if(is.null(zoom.length)) par$plot.zoom.extent.length else zoom.length
-
+    zoom.length = if(is.null(zoom.length)) par$plot.zoom.extent.length else zoom.length  
+    zoom.length = if(is.null(zoom.length)){     
+      zoom.length = min(
+        max(data[[set]]$channel$x) - min(data[[set]]$channel$x),
+        max(data[[set]]$channel$y) - min(data[[set]]$channel$y)
+      )/2  
+    } else zoom.length
+    
+    
 
 
     # specify plot extent #####################################################
 
+    plot.extent.rule = "full extent"
+    plot.x = mean(data[[set]]$channel$x)
+    plot.y = mean(data[[set]]$channel$y)
+    
+    if(zoom) plot.extent.rule = "zoom on center"
+
     # by set
-    if(is.null(extent)) extent = par$plot.zoom.extent
-    if(typeof(extent) == "character"){ if(extent %in% names(par$plot.zoom.extents)) extent = par$plot.zoom.extents[[extent]] else stop(paste("given zoom extent", extent, "unknown!"))}
-    plot.x = extent[1]
-    plot.y = extent[2]
-    plot.extent.rule = "predefined set"
+    if(!is.null(extent)) {      
+      if(typeof(extent) == "character"){if(extent %in% names(par$plot.zoom.extents)) extent = par$plot.zoom.extents[[extent]] else stop(paste("given zoom extent", extent, "unknown!"))}
+      plot.x = extent[1]
+      plot.y = extent[2]
+      plot.extent.rule = "predefined extent"
+    }
 
     # by cl point
     if(!is.null(cl)){
@@ -160,15 +174,17 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
       plot.y = y; if(is.null(x)) plot.x = data[[set]]$cl$smoothed$x[which.min(abs(data[[set]]$cl$smoothed$y - y))]
       plot.extent.rule = if(plot.extent.rule == "x-coordinate") "x/y-coordinates" else "y-coordinate"
     }
+    
 
     ### determine extend
     x.lim  = if(zoom) plot.x + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$x)
     y.lim  = if(zoom) plot.y + c(-0.5 * zoom.length, + 0.5 * zoom.length) else range(data[[set]]$channel$y)
+    
 
-
+    
     # output to console
     notice(paste("plot extend determined by:", plot.extent.rule))
-    notice("to show full extend use CM.plotPlanView(cmgo.obj, zoom=FALSE)", TRUE)
+    if(zoom) notice("to show full extend use CM.plotPlanView(cmgo.obj, zoom=FALSE)", TRUE)
     notice(paste("plot centered at x = ",plot.x, ", y = ", plot.y))
 
     if(plot.extent.rule == "centerline path errors") notice(paste("selected error", error, "of available error span 1 to", nrow(data[[set]]$cl[[error.type]])))
@@ -203,7 +219,7 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
       #if(exists("voronoi")) for(tile in voronoi$tiles){ lines(tile$bdry[[1]], col="lightgray")}
       if(!is.null(data[[set]]$cl$paths))           {segments(data[[set]]$cl$paths$x1, data[[set]]$cl$paths$y1, data[[set]]$cl$paths$x2, data[[set]]$cl$paths$y2, col="lightgray"); leg = leg.add(leg, "voronoi polygons", lty=1, col="gray")}
       #if(!is.null(data[[set]]$cl$paths.in.polygon)){segments(data[[set]]$cl$paths.in.polygon$x1, data[[set]]$cl$paths.in.polygon$y1, data[[set]]$cl$paths.in.polygon$x2, data[[set]]$cl$paths.in.polygon$y2, col="red");leg = leg.add(leg, "paths in polygon", lty=1, col="red")}
-      #segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="black", lty=3,lwd=2); leg = leg.add(leg, "cl paths (filtered)", lty=3, lwd=2, col="black")}
+      segments(data[[set]]$cl$cl.paths$x1, data[[set]]$cl$cl.paths$y1, data[[set]]$cl$cl.paths$x2, data[[set]]$cl$cl.paths$y2, col="black", lty=3,lwd=2); leg = leg.add(leg, "cl paths (filtered)", lty=3, lwd=2, col="black")
     }
 
     if(!is.null(error)){
@@ -237,8 +253,14 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
 
     # bank points #############################################################
     if(par$plot.planview.bankpoints && !is.null(data[[set]]$channel$x)){
-      points(data[[set]]$channel$y ~ data[[set]]$channel$x, pch=19, cex=0.8)
-      leg = leg.add(leg, paste("bank points of", name.set), pch=19, col="black", cex=0.8)
+      col.side = rep("black", length(data[[set]]$channel$x)) 
+  	  if(par$plot.planview.bankpoints.col){  
+        col.side = rep("red", length(data[[set]]$channel$x)) 
+        col.side[which(data[[set]]$channel$bank == "right")] = "green"
+  		  leg = leg.add(leg, paste("right bank points of", name.set), pch=19, col="green", cex=0.8)  		  
+  		  leg = leg.add(leg, paste("left bank points of", name.set), pch=19, col="red", cex=0.8)  		  
+  	  } else leg = leg.add(leg, paste("bank points of", name.set), pch=19, col="black", cex=0.8)
+  	  points(data[[set]]$channel$y ~ data[[set]]$channel$x, pch=19, cex=0.8, col=col.side)	
     }
 
     if(par$plot.planview.bankpoints.interpolated && !is.null(data[[set]]$polygon$x)){
@@ -292,19 +314,25 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
     # legend and scale bar ####################################################
     if(par$plot.planview.legend) leg.make(leg, par)
     if(par$plot.planview.scalebar){
-
+      
+      bdry = par()$usr
+      bar.len = signif(zoom.length/5,1)      
+  
       segments(
-        plot.x + 0.5 * zoom.length - grid.dist,
-        plot.y - 0.5 * zoom.length,
-        plot.x + 0.5 * zoom.length,
-        plot.y - 0.5 * zoom.length,
+        bdry[2] - ((bdry[2]-bdry[1])*0.05) - bar.len,
+        bdry[3] + ((bdry[4]-bdry[3])*0.05),
+        bdry[2] - ((bdry[2]-bdry[1])*0.05),
+        bdry[3] + ((bdry[4]-bdry[3])*0.05),
         lwd = 15, lend=2
       )
-      text(
-        plot.x + 0.5 * zoom.length - (0.5 * grid.dist),
-        plot.y - 0.5 * zoom.length + zoom.length / 30,
-        paste(par$plot.planview.grid.dist, "m")
+      text(          
+        bdry[2] - ((bdry[2]-bdry[1])*0.05) - bar.len / 2,          
+        bdry[3] + ((bdry[4]-bdry[3])*0.08),
+        paste(bar.len, par$input.units),
+        cex=1.2
+    
       )
+      
     }
 
   #} # for(plot in plots)
@@ -314,10 +342,12 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
   notice("plotting done!")
 
   return(list(
-    x   = plot.x,
-    y   = plot.y,
-    set = set,
-    cl  = cl
+    x    = plot.x,
+    y    = plot.y,
+    set  = set,
+    cl   = cl,
+    zoom = zoom,
+    zoom.length = if(zoom) zoom.length else NULL  
   ))
 
 }

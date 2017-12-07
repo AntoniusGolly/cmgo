@@ -246,7 +246,7 @@ CM.generatePolygon <- function(cmgo.obj){
             # if distance larger than threshold distance interpolate
             if(cb_dist < par$bank.reduce.min.dist){
 
-              ap = ap + nr_of_pts
+              ap = ap + 1
 
             } else { # if(cb_dist > par$bank.man.dist)
 
