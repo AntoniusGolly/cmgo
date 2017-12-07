@@ -10,7 +10,7 @@ Deriving principle **c**hannel **m**etrics from bank and long-profile geometry w
 
 ## Motivation
 
-Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. However, available products are lacking independency, transparency or functionality that is necessary to fit the versatile requirements of academic or applied research and thus the call for software solutions remains present ([Golly et al. 2017, in review](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/)). We conclude that none of the available approaches represents a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
+Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. However, available products are lacking independency, transparency or functionality that is necessary to fit the versatile requirements of academic or applied research and thus the call for software solutions remains present ([Golly et al. 2017b](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/)). We conclude that none of the available approaches represents a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
 
 ## License / Citation
 
