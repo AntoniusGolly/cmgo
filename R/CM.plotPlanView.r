@@ -208,7 +208,7 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
     )
 
     # grid ####################################################################
-    grid.dist = if(is.null(par$plot.planview.grid.dist)) round((x.lim[2]- x.lim[1] / 5)) else par$plot.planview.grid.dist
+    grid.dist = if(is.null(par$plot.planview.grid.dist)) signif(( (x.lim[2]- x.lim[1]) / 5),1) else par$plot.planview.grid.dist
     if(par$plot.planview.grid){
       abline(v=seq(floor(floor(min(x.lim))/100)*100, ceiling(ceiling(max(x.lim))/100)*100, grid.dist), col=colors()[356])
       abline(h=seq(floor(floor(min(y.lim))/100)*100, ceiling(ceiling(max(y.lim))/100)*100, grid.dist), col=colors()[356])
@@ -316,7 +316,7 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
     if(par$plot.planview.scalebar){
       
       bdry = par()$usr
-      bar.len = signif(zoom.length/5,1)      
+      bar.len = signif((x.lim[2]-x.lim[1]) / 5,1)
   
       segments(
         bdry[2] - ((bdry[2]-bdry[1])*0.05) - bar.len,
@@ -327,7 +327,7 @@ CM.plotPlanView <- function(cmgo.obj, set="set1", title=NULL, set.compare=NULL, 
       )
       text(          
         bdry[2] - ((bdry[2]-bdry[1])*0.05) - bar.len / 2,          
-        bdry[3] + ((bdry[4]-bdry[3])*0.08),
+        bdry[3] + ((bdry[4]-bdry[3])*0.1),
         paste(bar.len, par$input.units),
         cex=1.2
     
