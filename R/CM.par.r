@@ -172,11 +172,10 @@ CM.par <- function(par.set=NULL){
     steps.minimum.pool.length   = 10,          # as percentage of Wb [%]
     steps.minimum.residual.depth= 0.23,        # as percentage of Wb [%]
     steps.minimum.drop.height   = 3.3,         # as percentage of Wb [%]
-    steps.minimum.step.slope    = 10,          # average slope + 10 degree [°]
     steps.bank.full.width.fix   = TRUE,        # TRUE: use a fix bank full width for the whole stream, FALSE: calculate from banks
     steps.bank.full.width       = 3.7,         # [m]
     steps.average.slope.fix     = FALSE,
-    steps.average.slope         = 12.5,        #8.34, #12.5,         # [°]
+    steps.average.slope         = 12.5,        # 8.34, #12.5,         # [°]
 
     # ignore
     dummy = TRUE

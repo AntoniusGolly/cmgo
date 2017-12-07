@@ -16,9 +16,9 @@ Computer-aided products for studying rivers have a long tradition and numerous e
 
 The program is free to use, modify and redistribute under the terms of the GNU General Public License version 3 as published by the Free Software Foundation. If you make use of the work, please cite the work as follows:
 
->**Citation**: Golly, A. and Turowski, J. M.: Deriving principle channel metrics from bank and long-profile geometry with the R-package cmgo, Earth Surf. Dynam. Discuss., doi:10.5194/esurf-2017-32, in review, 2017.
+>**Citation**: Golly, A. and Turowski, J. M.: Deriving principal channel metrics from bank and long-profile geometry with the R package cmgo, Earth Surf. Dynam., 5, 557-570, https://doi.org/10.5194/esurf-5-557-2017, 2017.
 
-Find the [discussion paper at ESURF](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/).
+Find the [paper at ESURF](https://www.earth-surf-dynam.net/5/557/2017/esurf-5-557-2017.html).
 
 ## Installation
 

@@ -448,12 +448,19 @@ CM.calculateCenterline <- function(cmgo.obj, set=NULL){
 
         ### calculate slope #####################################
         for(local_slope_range in par$centerline.local.slope.range){
-          cl$smoothed[[paste("slope_", local_slope_range, sep="")]] = apply(cl$smoothed, 1, function(x){
-
+          cl$smoothed[[paste("slope_fit_", local_slope_range, sep="")]] = apply(cl$smoothed, 1, function(x){
             ind = which(cl$smoothed$cum_dist_2d >= x[["cum_dist_2d"]] & cl$smoothed$cum_dist_2d < (x[["cum_dist_2d"]] + local_slope_range))
             fit = lm(cl$smoothed$z[ind] ~ cl$smoothed$cum_dist_2d[ind])
             return(fit$coefficients[[2]])
-
+          })
+          cl$smoothed[[paste("slope_avg_", local_slope_range, sep="")]] = apply(cl$smoothed, 1, function(x){            
+            ind = which(cl$smoothed$cum_dist_2d >= x[["cum_dist_2d"]] & cl$smoothed$cum_dist_2d < (x[["cum_dist_2d"]] + local_slope_range))
+            sl  = (
+              tail(cl$smoothed$z[ind], n=1) - head(cl$smoothed$z[ind], n=1) 
+            ) / (                
+              head(cl$smoothed$cum_dist_2d[ind], n=1) - tail(cl$smoothed$cum_dist_2d[ind], n=1)
+            ) 
+            return(sl)            
           })
         }
 

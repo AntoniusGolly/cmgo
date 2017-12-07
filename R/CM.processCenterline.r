@@ -171,7 +171,7 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
         # select indices within the matching range
         ixs = which(cl_len >= x & cl_len < (x + w_range))
 
-        # fit a line through values
+        # fit a line through values (reverse indices to reflect water direction)
         w_fit = if(!all(is.na(w[ixs]))) lm(w[ixs] ~ rev(cl_len[ixs])) else return(NA)
 
         # return slope of fit
@@ -186,12 +186,24 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
         ixs = which(cl_len >= x & cl_len < (x + w_range))
 
         # return slope of average
-        return ((w[head(ixs, n=1)] - w[tail(ixs, n=1)]) / (cl_len[head(ixs, n=1)] - cl_len[tail(ixs, n=1)]))
+        return ((w[head(ixs, n=1)] - w[tail(ixs, n=1)]) / (cl_len[tail(ixs, n=1)] - cl_len[head(ixs, n=1)]))
 
       })
+     
+      # calculates the local difference of the width for a given point
+      dw.d = apply(as.array(cl_len), 1, function(x){
+        
+        # select indices within the matching range
+        ixs = which(cl_len >= x & cl_len < (x + w_range))
+        
+        # return difference
+        return (w[head(ixs, n=1)] - w[tail(ixs, n=1)])
+        
+      })
 
-      width_change[[paste("dw_fit_", w_range, sep="")]] = dw.fit
-      width_change[[paste("dw_avg_", w_range, sep="")]] = dw.avg
+      width_change[[paste0("dw_fit_", w_range)]] = dw.fit
+      width_change[[paste0("dw_avg_", w_range)]] = dw.avg
+      width_change[[paste0("dw_d_",   w_range)]] = dw.d
 
     }
 
@@ -346,20 +358,19 @@ CM.processCenterline <- function(cmgo.obj, set=NULL){
             pl_min  = par$steps.minimum.pool.length    * par$steps.bank.full.width / 100
             rd_min  = par$steps.minimum.residual.depth * par$steps.bank.full.width / 100
             dh_min  = par$steps.minimum.drop.height    * par$steps.bank.full.width / 100
-            ssl_min = par$steps.minimum.step.slope     + par$steps.average.slope
-            ssg_min = tan(ssl_min/360 * (2*pi)) * 100
-            slope   = if(par$steps.average.slope.fix) par$steps.average.slope else {
-              # calculate slope based on elevation and length of long profile
-              slope = atan(diff(range(data[[set]]$features$lp$z)) / tail(data[[set]]$features$lp$cum_dist_2d, n=1)) * 360 / (2*pi)
+            ssl_min = if(par$steps.average.slope.fix) par$steps.average.slope + 10 else {
+              # calculate minimum slope based on elevation and length of long profile
+              ( atan(diff(range(data[[set]]$features$lp$z)) / tail(data[[set]]$features$lp$cum_dist_2d, n=1)) * 360 / (2*pi) ) + 10
             }
+            ssg_min = tan(ssl_min/360 * (2*pi)) * 100
 
             notice("****** parameters **************************************************************")
-            notice(paste("min step length (sl_min = ",    par$steps.minimum.step.length,    "% of bank full width): ", sl_min, "[m]", sep=""));
-            notice(paste("max step length (sl_max = ",    par$steps.maximumg.step.length,   "% of bank full width): ", sl_max, "[m]", sep=""));
-            notice(paste("min pool length (pl_min = ",    par$steps.minimum.pool.length,    "% of bank full width): ", pl_min, "[m]", sep=""));
-            notice(paste("min residual depth (rd_min = ", par$steps.minimum.residual.depth, "% of bank full width): ", rd_min, "[m]", sep=""));
-            notice(paste("min drop height (dh_min = ",    par$steps.minimum.drop.height,    "% of bank full width): ", dh_min, "[m]", sep=""));
-            notice(paste("min step slope (ssl_min = ",    par$steps.minimum.step.slope,     "deg greater than mean slope): ", ssl_min, "[deg]  ", sep=""));
+            notice(paste0("min step length (sl_min = ",    par$steps.minimum.step.length,    "% of bank full width): ",   sl_min, "[m]"));
+            notice(paste0("max step length (sl_max = ",    par$steps.maximumg.step.length,   "% of bank full width): ",   sl_max, "[m]"));
+            notice(paste0("min pool length (pl_min = ",    par$steps.minimum.pool.length,    "% of bank full width): ",   pl_min, "[m]"));
+            notice(paste0("min residual depth (rd_min = ", par$steps.minimum.residual.depth, "% of bank full width): ",   rd_min, "[m]"));
+            notice(paste0("min drop height (dh_min = ",    par$steps.minimum.drop.height,    "% of bank full width): ",   dh_min, "[m]"));
+            notice(paste0("min step slope (ssl_min = ",                                      "mean slope + 10 degree): ", ssl_min, "[deg]"));
             notice("********************************************************************************")
 
             # prepare variables

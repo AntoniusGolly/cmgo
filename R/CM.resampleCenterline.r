@@ -168,9 +168,9 @@ CM.resampleCenterline <- function(cmgo.obj, set = NULL){
 
       for(slope in par$centerline.local.slope.range){
 
-        df[[paste("slope_median_",  slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else median(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][bin_ix])
-        df[[paste("slope_mean_",    slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][bin_ix])
-        df[[paste("slope_closest_", slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_", slope, sep="")]][ix])
+        df[[paste("slope_median_",  slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else median(data[[set]]$cl$smoothed[[paste("slope_avg_", slope, sep="")]][bin_ix])
+        df[[paste("slope_mean_",    slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_avg_", slope, sep="")]][bin_ix])
+        df[[paste("slope_closest_", slope, sep="")]] = if(is.null(data[[set]]$channel$z)) NA else mean(data[[set]]$cl$smoothed[[paste("slope_avg_", slope, sep="")]][ix])
 
       }
 
