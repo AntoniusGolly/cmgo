@@ -25,10 +25,8 @@ Find the [paper at ESURF](https://www.earth-surf-dynam.net/5/557/2017/esurf-5-55
 [Get](https://cran.r-project.org/), install and open R (2 min.) and run the following code in the R console:
 
 ```R
-# installation of dependencies (required only once)
-install.packages(c("spatstat", "zoo", "sp", "stringr", "rgl", "shapefiles"))
 
-# install devtools (required only once)
+# install devtools 
 install.packages("devtools")
 
 # load the devtool package
