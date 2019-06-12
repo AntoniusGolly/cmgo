@@ -34,13 +34,34 @@ library(devtools)
 
 # installation (required only once)
 install_github("AntoniusGolly/cmgo")
+```
 
+## Run cmgo
+```
 # include the package (required for every start of an R session)
 library(cmgo)
 
-# open the help and get started
-?cmgo
+# set your working directory 
+setwd("d:/your_folder") # in that folder an "input" folder must exist which contains one or more files with point data
+
+# load parameter
+par = CM.par()
+par$bank.interpolate.max.dist = 4 # set roughly to your expected channel width
+
+# load data assuming your file is lying in directory "input"
+cmgo.obj = CM.ini(NULL, par)
+
+# Generate a polygon from input data and plot // Fig. 1b
+cmgo.obj = CM.generatePolygon(cmgo.obj)
+
+# Generate the voronoi polygons and calculate the centerlin  // Fig. 1c-e
+cmgo.obj = CM.calculateCenterline(cmgo.obj)
+
+# Process the centerline (generate width) // Fig. 1f-g
+cmgo.obj = CM.processCenterline(cmgo.obj)
+
 ```
+
 
 ## Documentation
 
