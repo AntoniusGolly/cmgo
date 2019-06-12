@@ -74,7 +74,7 @@ CM.run <- function(object = NULL, par = NULL){
 
 
   ### plot plan view
-  plot.par = CM.plotPlanView(cmgo.obj, "set2", cl="cl1")
+  plot.par = CM.plotPlanView(cmgo.obj, "set1", cl="cl1")
 
   cat("\n--> ChannelMetrics ended successfully!\n")
 

@@ -76,7 +76,8 @@ CM.generatePolygon <- function(cmgo.obj){
     par(mfrow=c(1,1))
     for(set in names(data)){
 
-      plot(data[[set]]$polygon$y ~ data[[set]]$polygon$x, asp=1, type="l", xlab="X", ylab="Y", main=paste(paste("Channel overview ", set, " (", data[[set]]$survey, ")", sep="")))
+      plot(data[[set]]$polygon$y ~ data[[set]]$polygon$x, asp=1, type="l", xlab="X", ylab="Y", main=paste(paste("Channel overview ", set, " (", data[[set]]$survey, ")", sep="")), col=plot.colors)
+      if(par$plot.polygoncheck.colors == TRUE) points(data[[set]]$polygon$y ~ data[[set]]$polygon$x, asp=1, cex=0.3, col=colorRampPalette(c("blue", "red"))(length(data[[set]]$polygon$x)))
       n = 0
 
       ## produce an overview plot on both ends of the river polygon

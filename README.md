@@ -10,7 +10,7 @@ Deriving principle **c**hannel **m**etrics from bank and long-profile geometry w
 
 ## Motivation
 
-Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. However, available products are lacking independency, transparency or functionality that is necessary to fit the versatile requirements of academic or applied research and thus the call for software solutions remains present ([Golly et al. 2017b](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/)). We conclude that none of the available approaches represents a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
+Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. In [Golly et al. 2017b](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/) we compare multiple tools for analyzing river geometry and conclude that *cmgo* adds a unique value to the available approaches by providing a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
 
 ## License / Citation
 
@@ -22,22 +22,20 @@ Find the [paper at ESURF](https://www.earth-surf-dynam.net/5/557/2017/esurf-5-55
 
 ## Installation
 
-There are two ways to use cmgo:
-1. Include the cmgo package in R (for user with minor R experience, for users who do not intend to extend/modify the code)
-2. Source the R scripts manually (for users with major R experience, for users who intend to extend/modify the code)
-
-You'll able to see the R documentation of cmgo (type `?cmgo` in the R console) only if you choose option 1.!
-
-### 1. Include the cmgo package
-
 [Get](https://cran.r-project.org/), install and open R (2 min.) and run the following code in the R console:
 
 ```R
 # installation of dependencies (required only once)
 install.packages(c("spatstat", "zoo", "sp", "stringr", "rgl", "shapefiles"))
 
+# install devtools (required only once)
+install.packages("devtools")
+
+# load the devtool package
+library(devtools)
+
 # installation (required only once)
-install.packages("cmgo", repos="https://raw.githubusercontent.com/AntoniusGolly/repos/master", type="source")
+install_github("AntoniusGolly/cmgo")
 
 # include the package (required for every start of an R session)
 library(cmgo)
@@ -46,33 +44,7 @@ library(cmgo)
 ?cmgo
 ```
 
-### 2. Source the R scripts manually
-Alternatively, you can source the scipts manually. This has the benefit, that you can directly modify the scripts (note: only for advanced users advised). To do this, download this repository and extract the folder **./R** and **./data** to a location on your disc (e.g. "C:/cmgo"). Then run the following code:
-
-```R
-
-path_to_cmgo = "C:/cmgo" # path to cmgo directories "./R" and "./data"
-
-# installation of dependencies (required only once)
-install.packages(c("spatstat", "zoo", "sp", "stringr", "rgl", "shapefiles"))
-
-# load libraries
-library(zoo)
-library(spatstat)
-library(stringr)
-library(sp)
-library(rgl)
-library(shapefiles)
-
-# source functions and load data
-for(function.file in list.files(paste(path_to_cmgo, "/R",    sep="")) source(paste(path_to_cmgo, "/R/",    function.file, sep=""))
-for(data.file     in list.files(paste(path_to_cmgo, "/data", sep="")) load(paste(path_to_cmgo,   "/data/", data.file,     sep=""))
-
-```
-
 ## Documentation
-
-If you have included the R library in your R environment (option 1. of the Installation) you can view the documentation of the package and its functions by typing in your R console:
 
 ```R
 # package documentation

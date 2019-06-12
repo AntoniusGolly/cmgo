@@ -96,6 +96,7 @@ CM.par <- function(par.set=NULL){
 
     # enable/disable plots
     plot.polygoncheck           = TRUE,        # if [TRUE], a three-column plot is generated showing the entire river and both ends to rouhgly check the polygon consitency (see also CM.generatePolygon())
+    plot.polygoncheck.colors    = FALSE,       # if [TRUE], a polygoncheck will be colored
 
     plot.planview               = TRUE,        # create a plan view overview plot
     plot.planview.secondary     = TRUE,        # in the plan view plot, add a secodary data set for comparison (will be displayed in dashed lines)
