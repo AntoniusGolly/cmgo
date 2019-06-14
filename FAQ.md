@@ -24,9 +24,11 @@ There is two common issues with that. To find out, which applies use the suggest
 `CM.plotPlanView(cmgo.obj, set="set1", error=1, zoom.length=20)`
 
 #### 1.1 Gaps occurred in the centerline
-<img src="https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/03-sep-spacing.png" alt="drawing" width="600"/>
+<img src='https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/03-sep-spacing.png' alt='drawing' width='600'/>
+
 If your plot shows something similar to the left image decrease the value of the parameter `par$bank.interpolate.max.dist` and run the program again.
 
 #### 1.2 Segment cut-off not yet finished
-<img src="https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/basins.png" alt="drawing" width="600"/>
+<img src='https://raw.githubusercontent.com/AntoniusGolly/cmgo/master/man/figures/basins.png' alt='drawing' width='600'/>
+
 In case you image shows open side arms of the centerline cmgo will handle that case if you increase the parameter `par$bank.filter2.max.it`. By default there is 20 iterations to remove those sidearms. Increase to a higher value (e.g. 50) and rerun the program.   
