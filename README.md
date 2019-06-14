@@ -64,7 +64,7 @@ cmgo.obj = CM.processCenterline(cmgo.obj)
 
 ## FAQ
 
-[FAQ]
+[FAQ](FAQ.md)
 
 ## Documentation
 
