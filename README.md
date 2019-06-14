@@ -10,7 +10,7 @@ Deriving principle **c**hannel **m**etrics from bank and long-profile geometry w
 
 ## Motivation
 
-Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. In [Golly et al. 2017b](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/) we compare multiple tools for analyzing river geometry and conclude that *cmgo* adds a unique value to the available approaches by providing a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
+Computer-aided products for studying rivers have a long tradition and numerous efforts exist to derive principle channel metrics from remote or in-situ measurements of channel banks. In [Golly et al. 2017b](http://www.earth-surf-dynam-discuss.net/esurf-2017-32/) we compare numerous tools for analyzing river geometry and conclude that *cmgo* adds a unique value to the available approaches by providing a tool for objectively deriving channel metrics, while being easy and free to use and modify and allowing a high degree of parametrization and fine-tuning.
 
 ## License / Citation
 
@@ -62,27 +62,17 @@ cmgo.obj = CM.processCenterline(cmgo.obj)
 
 ```
 
-## Errors
-Most common error is this:
-```
-### exit due to maximum iterations (max. iterations = 20) ###
-Note: this may be caused by gaps that opened in the centerline due to
-jagged centerline paths. First, check for gaps visually with CM.plotPlanView(cmgo.obj, set="set1", error=1). 
-You can than either repair these gaps by editing the centerline paths manually or 
-simply increase the bank resolution via parameter par$bank.interpolation.max.dist! ```
+## FAQ
 
-In this case, take the suggested command from the error message and enter a zoom.length to show the problem:
-`CM.plotPlanView(cmgo.obj, set="set1", error=1, zoom.length=20)`
-
-If you cannot interpret this plot, please send an email to antonius.golly@gmail.com with the image and all of your run commands.
+[FAQ]
 
 ## Documentation
 
-```R
+```
 # package documentation
 ?cmgo
 
 # function documentation
 ?cmgo.run # e.g. for the docu of cmgo.run()
 ```
-The documentation is also [available as a *.pdf manual](https://raw.githubusercontent.com/AntoniusGolly/repos/master/manuals/cmgo_0.1.4.pdf).
+
