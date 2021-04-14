@@ -287,7 +287,7 @@ CM.generatePolygon <- function(cmgo.obj){
 
   } # for(set in names(data))
 
-  notice("CM.generatePolygone() has ended successfully!", TRUE)
+  notice("CM.generatePolygon() has ended successfully!", TRUE)
 
   object = list(
     data = data,

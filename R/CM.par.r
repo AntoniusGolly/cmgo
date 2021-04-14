@@ -60,7 +60,7 @@ CM.par <- function(par.set=NULL){
 
     # name of the parameter set
     name                        = "default",
-    version                     = "0.1.6",
+    version                     = "0.2.0",
 
     # workspace
     workspace.read              = TRUE,        # if [TRUE] it is tried to load the global data object from a workspace file in CM.ini()
@@ -94,7 +94,7 @@ CM.par <- function(par.set=NULL){
     output.dir                  = "output",
     output.sep                  = "\t",
 
-    # enable/disable plots
+    # enable/disable plots and configure them
     plot.polygoncheck           = TRUE,        # if [TRUE], a three-column plot is generated showing the entire river and both ends to rouhgly check the polygon consitency (see also CM.generatePolygon())
     plot.polygoncheck.colors    = FALSE,       # if [TRUE], a polygoncheck will be colored
 
@@ -177,7 +177,7 @@ CM.par <- function(par.set=NULL){
     steps.bank.full.width.fix   = TRUE,        # TRUE: use a fix bank full width for the whole stream, FALSE: calculate from banks
     steps.bank.full.width       = 3.7,         # [m]
     steps.average.slope.fix     = FALSE,
-    steps.average.slope         = 12.5,        # 8.34, #12.5,         # [°]
+    steps.average.slope         = 12.5,        # 8.34, #12.5,         # [deg]
 
     # ignore
     dummy = TRUE
