@@ -5,7 +5,9 @@
 \alias{demo}
 \title{Raw input demo data set to run the full stack of cmgo functions.
 Contains a list with sublists $par and $data.}
-\format{An object of class \code{list} of length 2.}
+\format{
+An object of class \code{list} of length 2.
+}
 \usage{
 demo
 }

@@ -6,7 +6,7 @@ Deriving principle **c**hannel **m**etrics from bank and long-profile geometry w
 
 ## What is cmgo?
 
-**cmgo** performs geometrical calculations on your channel bank points, which represent your basic input. The calculated geometry includes the centerline of one or multiple given channel shapes, channel length, local and average channel width, local and average slope, local and average bank retreat, or the distances from the centerline to the banks respectively, as well as allows to project additional spatial metrics to the centerline.
+**cmgo** performs geometrical calculations on your channel bank points  (Fig. 1.a), which represent your basic input. The calculated geometry includes the centerline (Fig. 1.e) of one or multiple given channel shapes, channel length, local and average channel width, local and average slope, local and average bank retreat, or the distances from the centerline to the banks respectively, as well as allows to project additional spatial metrics to the centerline.
 
 ## Motivation
 
@@ -22,7 +22,7 @@ Find the [paper at ESURF](https://www.earth-surf-dynam.net/5/557/2017/esurf-5-55
 
 ## Installation
 
-[Get](https://cran.r-project.org/), install and open R (2 min.) and run the following code in the R console:
+[Get](https://cran.r-project.org/), install and open R and run the following code in the R console:
 
 ```R
 

@@ -4,9 +4,20 @@
 \alias{CM.plotPlanView}
 \title{Plot a map of the channel}
 \usage{
-CM.plotPlanView(cmgo.obj, set = "set1", title = NULL, set.compare = NULL,
-  extent = NULL, zoom = FALSE, zoom.length = NULL, cl = NULL,
-  error = NULL, error.type = "errors.filter2", x = NULL, y = NULL)
+CM.plotPlanView(
+  cmgo.obj,
+  set = "set1",
+  title = NULL,
+  set.compare = NULL,
+  extent = NULL,
+  zoom = FALSE,
+  zoom.length = NULL,
+  cl = NULL,
+  error = NULL,
+  error.type = "errors.filter2",
+  x = NULL,
+  y = NULL
+)
 }
 \arguments{
 \item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}

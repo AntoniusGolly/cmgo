@@ -31,7 +31,7 @@ was successfull, the routine stops and returns the global data object):
 
 \enumerate{
 
-\item If \code{$workspace.read} is \code{TRUE} (default) the function looks for an .RData user workspace
+  \item If \code{$workspace.read} is \code{TRUE} (default) the function looks for an .RData user workspace
   named \code{$workspace.filename} (defaults to "./user_workspace.RData"). Note: there will be no such workspace file
   once you start a project, since it needs to be saved by the user with \code{\link[=CM.writeData]{CM.writeData()}}.
   If such a workspace file exists the global data object will be created from this source, otherwise the next source

@@ -5,7 +5,9 @@
 \alias{demo1}
 \title{Half processed demo data set to run test centerline processing of cmgo. The data set already contains a centerline.
 Contains a list with sublists $par and $data.}
-\format{An object of class \code{list} of length 2.}
+\format{
+An object of class \code{list} of length 2.
+}
 \usage{
 demo1
 }

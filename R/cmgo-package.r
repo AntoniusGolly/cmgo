@@ -47,7 +47,7 @@
 #' @importFrom stats lm median princomp
 #' @importFrom utils data head modifyList read.table tail write.table str packageVersion
 #' @importFrom stringr str_pad
-#' @importFrom spatstat dirichlet ppp psp owin nncross
+#' @importFrom spatstat.geom dirichlet ppp psp owin nncross
 #' @importFrom sp point.in.polygon
 #' @importFrom zoo rollapply
 #' @importFrom rgl clear3d plot3d abclines3d segments3d points3d

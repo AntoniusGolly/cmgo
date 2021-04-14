@@ -4,8 +4,7 @@
 \alias{CM.plotWidth}
 \title{Plot channel width}
 \usage{
-CM.plotWidth(cmgo.obj, set = "set1", set.compare = NULL, cl = NULL,
-  d = NULL)
+CM.plotWidth(cmgo.obj, set = "set1", set.compare = NULL, cl = NULL, d = NULL)
 }
 \arguments{
 \item{cmgo.obj}{the global object of type list containing data and parameters created with \code{\link[=CM.ini]{CM.ini()}}}

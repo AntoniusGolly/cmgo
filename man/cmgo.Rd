@@ -3,7 +3,6 @@
 \docType{package}
 \name{cmgo}
 \alias{cmgo}
-\alias{cmgo-package}
 \title{Deriving basic channel metrics from bank and long-profile geometry}
 \description{
 Principle channel metrics, as for example \strong{channel width or gradient},
