@@ -62,6 +62,25 @@ cmgo.obj = CM.processCenterline(cmgo.obj)
 
 ```
 
+## Input data
+You can find more info on how the data is structured typing `$ ?CM.ini` which is the function to initialize the main object. It will expect a file `./input/*`, relative to your working directory. Note, the filename is not important as all files in that folder will be read in. 
+
+The file by default should have this structure, where POINT_X and POINT_Y are ortorectified coordinates. The data can be either collected during field surveys with GPS or total stations or through remote sensing techniques with further digitizing for example in a GIS. The input can be given in any ASCII table format. By default, the program expects tab-delimited columns of a table with one header line with the header names Names (for the side) and POINT_X/_Y/Z (the coordinates of the bank points) where the z component is optional. The expected column names and tab delimiters are set in the parameters (see documentation of CM.par() for details). The order of the points can be either all right bank points first or all left bank points first but not mixed.
+```
+Name POINT_X POINT_Y
+right 401601.0819 3106437.335
+right 401586.5327 3106406.896
+right 401568.3238 3106383.586
+right 401558.4961 3106364.129
+...
+left 401621.4337 3106431.134
+left 401602.9913 3106405.991
+left 401574.6073 3106352.232
+left 401582.2671 3106323.134
+...
+```
+If you seek to change column names, column delimiters or alike, please check the default parameters and adapt them `$ ?CM.ini`
+
 ## FAQ
 
 For support and common technical fails please see the [FAQ](FAQ.md)
