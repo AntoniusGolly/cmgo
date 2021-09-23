@@ -79,7 +79,7 @@ left 401574.6073 3106352.232
 left 401582.2671 3106323.134
 ...
 ```
-If you seek to change column names, column delimiters or alike, please check the default parameters and adapt them `$ ?CM.ini`
+If you seek to change column names, column delimiters or alike, please check the default parameters and adapt them `$ ?CM.par`
 
 ## FAQ
 
